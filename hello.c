@@ -16,19 +16,21 @@ typedef struct tile{
     int x, y;
 }tile;
 
-void inicializa_area(tile ***area, int w, int h){
+tile **inicializa_area(int w, int h){
     int i,j;
+    tile **area;
     area = malloc(23*sizeof(tile*));
     area[0] = calloc(23*40, sizeof(tile));
     for(i=1; i<23; i++)
         area[i] = area[0] + i*40;
     for(i=0;i<23;i++)
         for(j=0;j<23;j++){
-            area[i][j]->x = i*w/40;
-            area[i][j]->y = i*h/23;
+            area[i][j].x = i*w/40;
+            area[i][j].y = i*h/23;
         }
-    area[0][0]->x = 0;
-    area[0][0]->y = 0;
+    area[0][0].x = 0;
+    area[0][0].y = 0;
+    return area;
 }
 
 void desenha_jogo(void){
@@ -42,10 +44,10 @@ void testa_init(bool test, const char *objeto){
 }
 
 int main(int argc, char *argv[]){
-    int wid, hei;
+    int wid, hei, i;
     jogador mysha;
     unsigned char key[ALLEGRO_KEY_MAX];
-    tile **area = NULL;
+    tile **area;
 
     memset(key, 0, sizeof(key));
     
@@ -56,8 +58,8 @@ int main(int argc, char *argv[]){
         wid = atoi(argv[1]);
         hei = atoi(argv[2]);
     }
-    
-    inicializa_area(&area, wid, hei);
+
+    area = inicializa_area(wid,hei);
 
     mysha.x = wid/2;
     mysha.y = hei/2;
@@ -104,14 +106,15 @@ int main(int argc, char *argv[]){
         switch(event.type){
             case ALLEGRO_EVENT_TIMER:
                 if(key[ALLEGRO_KEY_UP])
-                    mysha.y--;
+                    mysha.y-=16;
                 if(key[ALLEGRO_KEY_DOWN])
-                    mysha.y++;
+                    mysha.y+=16;
                 if(key[ALLEGRO_KEY_LEFT])
-                    mysha.x--;
+                    mysha.x-=16;
                 if(key[ALLEGRO_KEY_RIGHT])
-                    mysha.x++;
-
+                    mysha.x+=16;
+                if(key[ALLEGRO_KEY_TAB])
+                    exit(0);
                 for(int i = 0; i < ALLEGRO_KEY_MAX; i++)
                     key[i] &= KEY_SEEN;
 
@@ -127,7 +130,7 @@ int main(int argc, char *argv[]){
 
             case ALLEGRO_EVENT_DISPLAY_CLOSE:
                 feito = true;
-                break;
+                exit(0);
         }
 
         if(redraw && al_is_event_queue_empty(queue)){
@@ -135,7 +138,15 @@ int main(int argc, char *argv[]){
             al_draw_text(font, al_map_rgb(255, 255, 255), wid/2, hei/2, 0, "Hello world!");
             al_draw_bitmap(myshabmp, mysha.x, mysha.y, 0);
 
-            al_draw_bitmap(wall, area[0][0].x, area[0][0].y, 0);
+            for (i = 0; i < wid; i++){
+                al_draw_bitmap(wall, i*16, 0, 0);
+                al_draw_bitmap(wall, i*16, hei-16, 0);
+            }
+            for (i = 1; i < hei-1; i++){
+                al_draw_bitmap(wall, 0, i*16, 0);
+                al_draw_bitmap(wall, wid-16, i*16, 0);
+            }
+            al_draw_bitmap(wall, area[1][1].x, area[1][1].y, 0);
             al_draw_filled_rectangle(240, 260, 340, 340, al_map_rgba_f(0, 0, 0.5, 0.5));
             al_flip_display();
 
