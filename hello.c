@@ -13,24 +13,28 @@
 typedef struct tile{
     //enum tipo{Empty = 0, Wall, Dirt, Player, Rock, Exit, Diamond}tipo;
     int tipo;
-    int x,y;
+    int x, y;
 }tile;
 
-void inicializa_area(tile **area, int w, int h){
-    int i;
-    area = malloc(22*sizeof(tile*));
-    area[0] = calloc(22*40, sizeof(tile));
-    for(i=1; i<22; i++){
+void inicializa_area(tile ***area, int w, int h){
+    int i,j;
+    area = malloc(23*sizeof(tile*));
+    area[0] = calloc(23*40, sizeof(tile));
+    for(i=1; i<23; i++)
         area[i] = area[0] + i*40;
-        area[i]->x = i*w/40;
-        area[i]->y = i*h/22;
-    }
-    
+    for(i=0;i<23;i++)
+        for(j=0;j<23;j++){
+            area[i][j]->x = i*w/40;
+            area[i][j]->y = i*h/23;
+        }
+    area[0][0]->x = 0;
+    area[0][0]->y = 0;
 }
 
 void desenha_jogo(void){
 
 }
+
 void testa_init(bool test, const char *objeto){
     if(test) return;
     printf("%s não pôde ser inicializado\n", objeto);
@@ -53,7 +57,7 @@ int main(int argc, char *argv[]){
         hei = atoi(argv[2]);
     }
     
-    inicializa_area(area, wid, hei);
+    inicializa_area(&area, wid, hei);
 
     mysha.x = wid/2;
     mysha.y = hei/2;
@@ -130,7 +134,8 @@ int main(int argc, char *argv[]){
             al_clear_to_color(al_map_rgb(0, 0, 0));
             al_draw_text(font, al_map_rgb(255, 255, 255), wid/2, hei/2, 0, "Hello world!");
             al_draw_bitmap(myshabmp, mysha.x, mysha.y, 0);
-            al_draw_bitmap(wall, 0, 0, 0);
+
+            al_draw_bitmap(wall, area[0][0].x, area[0][0].y, 0);
             al_draw_filled_rectangle(240, 260, 340, 340, al_map_rgba_f(0, 0, 0.5, 0.5));
             al_flip_display();
 
