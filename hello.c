@@ -10,30 +10,67 @@
 #define KEY_SEEN 1
 #define KEY_RELEASED 2
 
+#define LIN 23
+#define COL 40
+
 typedef struct tile{
-    //enum tipo{Empty = 0, Wall, Dirt, Player, Rock, Exit, Diamond}tipo;
-    int tipo;
+    enum tipo{Empty = 0, Wall, Dirt, Player, Rock, Exit, Diamond}tipo;
     int x, y;
 }tile;
+
+void noop(void){ }
 
 tile **inicializa_area(int w, int h){
     int i,j;
     tile **area;
-    area = malloc(23*sizeof(tile*));
-    area[0] = calloc(23*40, sizeof(tile));
-    for(i=1; i<23; i++)
-        area[i] = area[0] + i*40;
-    for(i=0;i<23;i++)
-        for(j=0;j<23;j++){
-            area[i][j].x = i*w/40;
-            area[i][j].y = i*h/23;
+    area = malloc(COL*sizeof(tile*));
+    area[0] = calloc(LIN*COL, sizeof(tile));
+    for(i=1; i<LIN; i++)
+        area[i] = area[0] + i*COL;
+    for(i=0;i<LIN;i++)
+        for(j=0;j<COL;j++){
+            area[i][j].x = j*w/COL;
+            area[i][j].y = i*h/LIN;
         }
     area[0][0].x = 0;
     area[0][0].y = 0;
     return area;
 }
 
-void desenha_jogo(void){
+void inicializa_jogo(tile **area){
+    int i;
+    for (i = 0; i < LIN; i++){
+        area[i][0].tipo = Wall;
+        area[i][COL-1].tipo = Wall; 
+    }
+    for (i = 1; i < COL; i++){
+        area[0][i].tipo = Wall;
+        area[LIN-1][i].tipo = Wall;
+    }
+}
+
+void desenha_jogo(tile **area, ALLEGRO_BITMAP *sprites){
+    int i, j;
+    for(i = 0; i < LIN; i++)
+        for(j = 0; j < COL; j++){
+            switch(area[i][j].tipo){
+                case Empty:
+                    noop();
+                case Wall:
+                    al_draw_bitmap_region(sprites, 0, 48, 16, 16, area[i][j].x, area[i][j].y, 0);
+                case Dirt:
+                    al_draw_bitmap_region(sprites, 48, 48, 16, 16, area[i][j].x, area[i][j].y, 0);
+                case Player:
+                    al_draw_bitmap_region(sprites, 0, 16, 16, 16, area[i][j].x, area[i][j].y, 0);
+                case Rock:
+                    al_draw_bitmap_region(sprites, 80, 48, 16, 16, area[i][j].x, area[i][j].y, 0);
+                case Exit:
+                    al_draw_bitmap_region(sprites, 80, 64, 16, 16, area[i][j].x, area[i][j].y, 0);
+                case Diamond:
+                    al_draw_bitmap_region(sprites, 0, 64, 16, 16, area[i][j].x, area[i][j].y, 0);
+            }
+
+        }
 
 }
 
@@ -53,14 +90,13 @@ int main(int argc, char *argv[]){
     
     if (argv[1] == NULL || argv[2] == NULL){ // valores padrão caso tamanho não for informado
         wid = 640;
-        hei = 480;
+        hei = 352;
     }else{
         wid = atoi(argv[1]);
         hei = atoi(argv[2]);
     }
 
     area = inicializa_area(wid,hei);
-
     mysha.x = wid/2;
     mysha.y = hei/2;
     
@@ -84,6 +120,9 @@ int main(int argc, char *argv[]){
     ALLEGRO_BITMAP* myshabmp = al_load_bitmap("./resources/mysha.png");
     testa_init(myshabmp, "ratinho");
 
+    ALLEGRO_BITMAP* sprites = al_load_bitmap("./resources/spritesheet.png");
+    testa_init(sprites, "sprites");
+
     ALLEGRO_BITMAP* wall = al_load_bitmap("./resources/steel.png");
     testa_init(wall, "parede");
 
@@ -98,6 +137,7 @@ int main(int argc, char *argv[]){
     ALLEGRO_EVENT event;
 
     al_start_timer(timer);
+    inicializa_jogo(area);
 
     while(1){
         al_wait_for_event(queue, &event);
@@ -137,15 +177,16 @@ int main(int argc, char *argv[]){
             al_clear_to_color(al_map_rgb(0, 0, 0));
             al_draw_text(font, al_map_rgb(255, 255, 255), wid/2, hei/2, 0, "Hello world!");
             al_draw_bitmap(myshabmp, mysha.x, mysha.y, 0);
+            desenha_jogo(area, sprites);
 
-            for (i = 0; i < wid; i++){
+            /*for (i = 0; i < wid; i++){
                 al_draw_bitmap(wall, i*16, 0, 0);
                 al_draw_bitmap(wall, i*16, hei-16, 0);
             }
             for (i = 1; i < hei-1; i++){
                 al_draw_bitmap(wall, 0, i*16, 0);
                 al_draw_bitmap(wall, wid-16, i*16, 0);
-            }
+            }*/
             al_draw_bitmap(wall, area[1][1].x, area[1][1].y, 0);
             al_draw_filled_rectangle(240, 260, 340, 340, al_map_rgba_f(0, 0, 0.5, 0.5));
             al_flip_display();
