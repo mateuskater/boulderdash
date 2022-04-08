@@ -15,10 +15,10 @@
 #define LIN 23
 #define COL 40
 
-typedef struct tile{
-    enum tipo{Empty = 0, Wall, Dirt, Player, Rock, Exit, Brick, Diamond}tipo;
-    int x, y;
-}tile;
+#define UP 0
+#define RIGHT 1
+#define DOWN 2
+#define LEFT 3
 
 void noop(void){ }
 
@@ -29,17 +29,15 @@ tile **aloca_area(int w, int h){
     area[0] = calloc(LIN*COL, sizeof(tile));
     for(i=1; i<LIN; i++)
         area[i] = area[0] + i*COL;
-    for(i=0;i<LIN;i++)
+    /*for(i=0;i<LIN;i++)
         for(j=0;j<COL;j++){
             area[i][j].x = j*w/COL;
             area[i][j].y = i*h/LIN;
-        }
-    area[0][0].x = 0;
-    area[0][0].y = 0;
+        }*/
     return area;
 }
 
-void inicializa_jogo(tile **area){
+void inicializa_jogo(tile **area, jogador *player){
     int i, j;
     char aux;
     ALLEGRO_FILE *level = al_fopen("./resources/level1.txt", "r");
@@ -52,6 +50,9 @@ void inicializa_jogo(tile **area){
                     case 'W':
                         area[i][j].tipo = Wall;
                         break;
+                    case 'w':
+                        area[i][j].tipo = Brick;
+                        break;
                     case 'd':
                         area[i][j].tipo = Diamond;
                         break;
@@ -59,21 +60,23 @@ void inicializa_jogo(tile **area){
                         area[i][j].tipo = Rock;
                         break;
                     case '.':
-                        area[i][j].tipo = Empty;
+                        area[i][j].tipo = Dirt;
                         break;
                     case 'P':
                         area[i][j].tipo = Exit;
                         break;
                     case 'X':
                         area[i][j].tipo = Player;
+                        player->x = j;
+                        player->y = i;
                         break;
                     case ' ':
                         area[i][j].tipo = Empty;
                         break;
                 }
-            }
+            }else j--;
         }
-    
+    al_fclose(level);
     /*for (i = 0; i < LIN; i++){
         area[i][0].tipo = Wall;
         area[i][COL-1].tipo = Wall; 
@@ -88,6 +91,12 @@ void inicializa_jogo(tile **area){
     }*/
 }
 
+int colisao(tile **area, int direcao, jogador player){
+    int px,py; //player x e player y, para simplificar
+
+    if (direcao = UP && (area[py-1][px].tipo == Brick || area[py-1][px].tipo == Wall)){}   
+    return 0;
+}
 void desenha_jogo(tile **area, ALLEGRO_BITMAP *sprites){
     int i, j;
 
@@ -98,25 +107,25 @@ void desenha_jogo(tile **area, ALLEGRO_BITMAP *sprites){
                     noop();
                     break;
                 case Wall:
-                    al_draw_bitmap_region(sprites, 0, 48, 16, 16, area[i][j].x, area[i][j].y, 0);
+                    al_draw_bitmap_region(sprites, 0, 48, 16, 16, j*16, i*16, 0);
                     break;
                 case Dirt:
-                    al_draw_bitmap_region(sprites, 48, 48, 16, 16, area[i][j].x, area[i][j].y, 0);
+                    al_draw_bitmap_region(sprites, 48, 48, 16, 16, j*16, i*16, 0);
                     break;
                 case Player:
-                    al_draw_bitmap_region(sprites, 0, 16, 16, 16, area[i][j].x, area[i][j].y, 0);
+                    al_draw_bitmap_region(sprites, 0, 0, 16, 16, j*16, i*16, 0);
                     break;
                 case Rock:
-                    al_draw_bitmap_region(sprites, 80, 48, 16, 16, area[i][j].x, area[i][j].y, 0);
+                    al_draw_bitmap_region(sprites, 80, 48, 16, 16, j*16, i*16, 0);
                     break;
                 case Exit:
-                    al_draw_bitmap_region(sprites, 80, 64, 16, 16, area[i][j].x, area[i][j].y, 0);
+                    al_draw_bitmap_region(sprites, 80, 64, 16, 16, j*16, i*16, 0);
                     break;
                 case Brick:
-                    al_draw_bitmap_region(sprites, 32, 48, 16, 16, area[i][j].x, area[i][j].y, 0);
+                    al_draw_bitmap_region(sprites, 32, 48, 16, 16, j*16, i*16, 0);
                     break;
                 case Diamond:
-                    al_draw_bitmap_region(sprites, 0, 64, 16, 16, area[i][j].x, area[i][j].y, 0);
+                    al_draw_bitmap_region(sprites, 0, 64, 16, 16, j*16, i*16, 0);
                     break;
             }
         }
@@ -145,8 +154,6 @@ int main(int argc, char *argv[]){
     }
 
     area = aloca_area(wid,hei);
-    player.x = wid/2;
-    player.y = hei/2;
     
     testa_init(al_init(), "allegro");
     testa_init(al_install_keyboard(), "teclado");
@@ -171,6 +178,8 @@ int main(int argc, char *argv[]){
     ALLEGRO_BITMAP* wall = al_load_bitmap("./resources/steel.png");
     testa_init(wall, "parede");
 
+    ALLEGRO_BITMAP* rockford = al_create_sub_bitmap(sprites, 0, 0, 16, 16);
+
     ALLEGRO_KEYBOARD_STATE ks;
 
     al_register_event_source(queue, al_get_keyboard_event_source());
@@ -182,7 +191,7 @@ int main(int argc, char *argv[]){
     ALLEGRO_EVENT event;
 
     al_start_timer(timer);
-    inicializa_jogo(area);
+    inicializa_jogo(area, &player);
 
     while(1){
         al_wait_for_event(queue, &event);
@@ -190,14 +199,14 @@ int main(int argc, char *argv[]){
 
         switch(event.type){
             case ALLEGRO_EVENT_TIMER:
-                if((key[ALLEGRO_KEY_UP] || key[ALLEGRO_KEY_W]) && player.y > 16)
-                    player.y-=16;
-                if((key[ALLEGRO_KEY_DOWN] || key[ALLEGRO_KEY_S]) && player.y < hei-32)
-                    player.y+=16;
-                if((key[ALLEGRO_KEY_LEFT] || key[ALLEGRO_KEY_A]) && player.x > 16)
-                    player.x-=16;
-                if((key[ALLEGRO_KEY_RIGHT] || key[ALLEGRO_KEY_D]) && player.x < wid-32)
-                    player.x+=16;
+                if((key[ALLEGRO_KEY_UP] || key[ALLEGRO_KEY_W]) && player.y > 1)
+                    player.y--;
+                if((key[ALLEGRO_KEY_DOWN] || key[ALLEGRO_KEY_S]) && player.y < LIN-3)
+                    player.y++;
+                if((key[ALLEGRO_KEY_LEFT] || key[ALLEGRO_KEY_A]) && player.x > 1)
+                    player.x--;
+                if((key[ALLEGRO_KEY_RIGHT] || key[ALLEGRO_KEY_D]) && player.x < COL-2)
+                    player.x++;
                 if(key[ALLEGRO_KEY_ESCAPE])
                     exit(0);
                 for(int i = 0; i < ALLEGRO_KEY_MAX; i++)
@@ -222,7 +231,7 @@ int main(int argc, char *argv[]){
             al_clear_to_color(al_map_rgb(0, 0, 0));
             al_draw_text(font, al_map_rgb(255, 255, 255), wid/2, hei/2, 0, "Hello world!");
             desenha_jogo(area, sprites);
-            al_draw_bitmap_region(sprites, 0, 0, 16, 16, player.x, player.y, 0);
+            al_draw_bitmap(rockford, player.x*16, player.y*16, 0);
             al_flip_display();
 
             redraw = false;
