@@ -9,6 +9,8 @@
 
 #define KEY_SEEN 1
 #define KEY_RELEASED 2
+#define DEFAULT_WIDTH 640
+#define DEFAULT_HEIGHT 352
 
 #define LIN 23
 #define COL 40
@@ -38,8 +40,41 @@ tile **aloca_area(int w, int h){
 }
 
 void inicializa_jogo(tile **area){
-    int i;
-    for (i = 0; i < LIN; i++){
+    int i, j;
+    char aux;
+    ALLEGRO_FILE *level = al_fopen("./resources/level1.txt", "r");
+
+    for(i = 0; i < LIN; i++)
+        for(j = 0; j < COL; j++){
+            al_fread(level, &aux, 1);
+            if (aux != '\n'){
+                switch(aux){
+                    case 'W':
+                        area[i][j].tipo = Wall;
+                        break;
+                    case 'd':
+                        area[i][j].tipo = Diamond;
+                        break;
+                    case 'r':
+                        area[i][j].tipo = Rock;
+                        break;
+                    case '.':
+                        area[i][j].tipo = Empty;
+                        break;
+                    case 'P':
+                        area[i][j].tipo = Exit;
+                        break;
+                    case 'X':
+                        area[i][j].tipo = Player;
+                        break;
+                    case ' ':
+                        area[i][j].tipo = Empty;
+                        break;
+                }
+            }
+        }
+    
+    /*for (i = 0; i < LIN; i++){
         area[i][0].tipo = Wall;
         area[i][COL-1].tipo = Wall; 
     }
@@ -50,11 +85,12 @@ void inicializa_jogo(tile **area){
     for (i = 1; i < 30; i++){
         area[8][i].tipo = Brick;
         area[16][COL-i-1].tipo = Brick;
-    }
+    }*/
 }
 
 void desenha_jogo(tile **area, ALLEGRO_BITMAP *sprites){
     int i, j;
+
     for(i = 0; i < LIN; i++)
         for(j = 0; j < COL; j++){
             switch(area[i][j].tipo){
@@ -100,9 +136,9 @@ int main(int argc, char *argv[]){
 
     memset(key, 0, sizeof(key));
     
-    if (argv[1] == NULL || argv[2] == NULL){ // valores padrão caso tamanho não for informado
-        wid = 640;
-        hei = 352;
+    if (argv[1] != NULL || argv[2] != NULL){ // valores padrão caso tamanho não for informado
+        wid = DEFAULT_WIDTH;
+        hei = DEFAULT_HEIGHT;
     }else{
         wid = atoi(argv[1]);
         hei = atoi(argv[2]);
