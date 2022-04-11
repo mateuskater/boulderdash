@@ -41,3 +41,12 @@ void desenha_pedras(nodo *ini, t_sprites sprites){
         al_draw_bitmap(sprites.rock, aux->x, aux->y, 0);
     }
 }
+
+void atualiza_pedras(nodo *ini, tile **area, t_sprites sprites, int x, int y){
+    nodo *aux = ini;
+    while(aux->y != y && aux->x != x)
+        aux = aux->next;
+    aux->att = 1;
+    if (area[aux->y+1][aux->x].tipo == Empty)
+        aux->y++;
+}

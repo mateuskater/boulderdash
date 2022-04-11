@@ -5,9 +5,9 @@
 #define KEY_RELEASED 2
 
 #define DEFAULT_WIDTH 640
-#define DEFAULT_HEIGHT 368
+#define DEFAULT_HEIGHT 300
 
-#define LIN 23
+#define LIN 22
 #define COL 40
 
 #define STILL 0

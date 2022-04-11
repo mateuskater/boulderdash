@@ -9,8 +9,6 @@
 #include "init_sprites.h"
 #include "lista_pedras.h"
 
-void noop(void){ }
-
 tile **aloca_area(int lin, int col){
     int i;
     tile **area;
@@ -21,10 +19,9 @@ tile **aloca_area(int lin, int col){
     return area;
 }
 
-void inicializa_jogo(tile **area, jogador *player){
+void inicializa_jogo(tile **area, jogador *player, nodo *pedras){
     int i, j;
     char aux;
-    nodo *pedra = inicializa_lista();
     ALLEGRO_FILE *level = al_fopen("./resources/level1.txt", "r");
 
     for(i = 0; i < LIN; i++)
@@ -43,7 +40,7 @@ void inicializa_jogo(tile **area, jogador *player){
                         break;
                     case 'r':
                         area[i][j].tipo = Rock;
-                        insere(pedra, STILL, 1, j, i);
+                        insere(pedras, STILL, 1, j, i);
                         break;
                     case '.':
                         area[i][j].tipo = Dirt;
@@ -83,35 +80,34 @@ int colisao(tile **area, int direcao, jogador player){
     
     return 0;
 }
-void desenha_jogo(tile **area, ALLEGRO_BITMAP *sprites){
+void desenha_jogo(tile **area, t_sprites sprites){
     int i, j;
 
     for(i = 0; i < LIN; i++)
         for(j = 0; j < COL; j++){
             switch(area[i][j].tipo){
                 case Empty:
-                    noop();
                     break;
                 case Wall:
-                    al_draw_bitmap(sprites->player[0], j*16, i*16+1, 0);
+                    al_draw_bitmap(sprites.wall, j*16, i*16, 0);
                     break;
                 case Dirt:
-                    al_draw_bitmap_region(sprites, 48, 48, 16, 16, j*16, i*16+1, 0);
+                    al_draw_bitmap(sprites.dirt, j*16, i*16, 0);
                     break;
                 case Player:
-                    al_draw_bitmap_region(sprites, 0, 0, 16, 16, j*16, i*16+1, 0);
+                    al_draw_bitmap(sprites.player[0], j*16, i*16, 0);
                     break;
                 case Rock:
-                    al_draw_bitmap_region(sprites, 80, 48, 16, 16, j*16, i*16+1, 0);
+                    // al_draw_bitmap(sprites.rock, j*16, i*16, 0);
                     break;
                 case Exit:
-                    al_draw_bitmap_region(sprites, 80, 64, 16, 16, j*16, i*16+1, 0);
+                    al_draw_bitmap(sprites.rock, j*16, i*16, 0);
                     break;
                 case Brick:
-                    al_draw_bitmap_region(sprites, 32, 48, 16, 16, j*16, i*16+1, 0);
+                    al_draw_bitmap(sprites.brick, j*16, i*16, 0);
                     break;
                 case Diamond:
-                    al_draw_bitmap_region(sprites, 0, 64, 16, 16, j*16, i*16+1, 0);
+                    al_draw_bitmap(sprites.diamond[0], j*16, i*16, 0);
                     break;
             }
         }
@@ -128,6 +124,7 @@ int main(int argc, char *argv[]){
     jogador player;
     unsigned char key[ALLEGRO_KEY_MAX];
     tile **area;
+    nodo *pedras = inicializa_lista();
 
     memset(key, 0, sizeof(key));
     
@@ -163,11 +160,7 @@ int main(int argc, char *argv[]){
     ALLEGRO_FONT* font = al_create_builtin_font();
     testa_init(font, "addon de fonte");
 
-    t_sprites* sprites = carrega_sprites;
-    testa_init(sprites, "sprites");
-
-    ALLEGRO_BITMAP* wall = al_load_bitmap("./resources/steel.png");
-    testa_init(wall, "parede");
+    t_sprites sprites = carrega_sprites();
 
     // ALLEGRO_BITMAP* rockford = al_create_sub_bitmap(sprites, 0, 0, 16, 16);
 
@@ -184,7 +177,7 @@ int main(int argc, char *argv[]){
 
     al_start_timer(timer);
     al_start_timer(timer_player);
-    inicializa_jogo(area, &player);
+    inicializa_jogo(area, &player, pedras);
 
     while(1){
         al_wait_for_event(queue, &event);
@@ -237,7 +230,8 @@ int main(int argc, char *argv[]){
             al_clear_to_color(al_map_rgb(0, 0, 0));
             al_draw_text(font, al_map_rgb(255, 255, 255), wid/2, hei/2, 0, "Hello world!");
             desenha_jogo(area, sprites);
-            // al_draw_bitmap(rockford, player.x*16, player.y*16, 0);
+            desenha_pedras(pedras, sprites);
+            al_draw_bitmap(sprites.player[0], player.x*16, player.y*16, 0);
             al_flip_display();
 
             redraw = false;
