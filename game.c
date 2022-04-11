@@ -1,45 +1,30 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "bdash.h"
 #include <allegro5/allegro5.h>
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_primitives.h>
 #include <stdbool.h>
-
-#define KEY_SEEN 1
-#define KEY_RELEASED 2
-#define DEFAULT_WIDTH 640
-#define DEFAULT_HEIGHT 352
-
-#define LIN 23
-#define COL 40
-
-#define UP 0
-#define RIGHT 1
-#define DOWN 2
-#define LEFT 3
+#include "bdash.h"
+#include "init_sprites.h"
+#include "lista_pedras.h"
 
 void noop(void){ }
 
-tile **aloca_area(int w, int h){
-    int i,j;
+tile **aloca_area(int lin, int col){
+    int i;
     tile **area;
     area = malloc(COL*sizeof(tile*));
     area[0] = calloc(LIN*COL, sizeof(tile));
     for(i=1; i<LIN; i++)
         area[i] = area[0] + i*COL;
-    /*for(i=0;i<LIN;i++)
-        for(j=0;j<COL;j++){
-            area[i][j].x = j*w/COL;
-            area[i][j].y = i*h/LIN;
-        }*/
     return area;
 }
 
 void inicializa_jogo(tile **area, jogador *player){
     int i, j;
     char aux;
+    nodo *pedra = inicializa_lista();
     ALLEGRO_FILE *level = al_fopen("./resources/level1.txt", "r");
 
     for(i = 0; i < LIN; i++)
@@ -58,6 +43,7 @@ void inicializa_jogo(tile **area, jogador *player){
                         break;
                     case 'r':
                         area[i][j].tipo = Rock;
+                        insere(pedra, STILL, 1, j, i);
                         break;
                     case '.':
                         area[i][j].tipo = Dirt;
@@ -66,7 +52,7 @@ void inicializa_jogo(tile **area, jogador *player){
                         area[i][j].tipo = Exit;
                         break;
                     case 'X':
-                        area[i][j].tipo = Player;
+                        area[i][j].tipo = Empty;
                         player->x = j;
                         player->y = i;
                         break;
@@ -77,24 +63,24 @@ void inicializa_jogo(tile **area, jogador *player){
             }else j--;
         }
     al_fclose(level);
-    /*for (i = 0; i < LIN; i++){
-        area[i][0].tipo = Wall;
-        area[i][COL-1].tipo = Wall; 
-    }
-    for (i = 1; i < COL; i++){
-        area[0][i].tipo = Wall;
-        area[LIN-1][i].tipo = Wall;
-    }
-    for (i = 1; i < 30; i++){
-        area[8][i].tipo = Brick;
-        area[16][COL-i-1].tipo = Brick;
-    }*/
 }
 
 int colisao(tile **area, int direcao, jogador player){
-    int px,py; //player x e player y, para simplificar
-
-    if (direcao = UP && (area[py-1][px].tipo == Brick || area[py-1][px].tipo == Wall)){}   
+    int px = player.x, py = player.y; //player.x e player.y, para simplificar
+    int cima = area[py-1][px].tipo, //ladrilhos adjacentes
+        esquerda = area[py][px-1].tipo,
+        baixo = area[py+1][px].tipo,
+        direita = area[py][px+1].tipo;
+    
+    if (direcao == UP && (cima == Brick || cima == Wall || cima == Rock))
+        return 1;
+    if (direcao == LEFT && (esquerda == Brick || esquerda == Wall || esquerda == Rock))
+        return 1;
+    if (direcao == DOWN && (baixo == Brick || baixo == Wall || baixo == Rock))
+        return 1;
+    if (direcao == RIGHT && (direita == Brick || direita == Wall || direita == Rock))
+        return 1;
+    
     return 0;
 }
 void desenha_jogo(tile **area, ALLEGRO_BITMAP *sprites){
@@ -107,25 +93,25 @@ void desenha_jogo(tile **area, ALLEGRO_BITMAP *sprites){
                     noop();
                     break;
                 case Wall:
-                    al_draw_bitmap_region(sprites, 0, 48, 16, 16, j*16, i*16, 0);
+                    al_draw_bitmap(sprites->player[0], j*16, i*16+1, 0);
                     break;
                 case Dirt:
-                    al_draw_bitmap_region(sprites, 48, 48, 16, 16, j*16, i*16, 0);
+                    al_draw_bitmap_region(sprites, 48, 48, 16, 16, j*16, i*16+1, 0);
                     break;
                 case Player:
-                    al_draw_bitmap_region(sprites, 0, 0, 16, 16, j*16, i*16, 0);
+                    al_draw_bitmap_region(sprites, 0, 0, 16, 16, j*16, i*16+1, 0);
                     break;
                 case Rock:
-                    al_draw_bitmap_region(sprites, 80, 48, 16, 16, j*16, i*16, 0);
+                    al_draw_bitmap_region(sprites, 80, 48, 16, 16, j*16, i*16+1, 0);
                     break;
                 case Exit:
-                    al_draw_bitmap_region(sprites, 80, 64, 16, 16, j*16, i*16, 0);
+                    al_draw_bitmap_region(sprites, 80, 64, 16, 16, j*16, i*16+1, 0);
                     break;
                 case Brick:
-                    al_draw_bitmap_region(sprites, 32, 48, 16, 16, j*16, i*16, 0);
+                    al_draw_bitmap_region(sprites, 32, 48, 16, 16, j*16, i*16+1, 0);
                     break;
                 case Diamond:
-                    al_draw_bitmap_region(sprites, 0, 64, 16, 16, j*16, i*16, 0);
+                    al_draw_bitmap_region(sprites, 0, 64, 16, 16, j*16, i*16+1, 0);
                     break;
             }
         }
@@ -163,34 +149,41 @@ int main(int argc, char *argv[]){
     ALLEGRO_TIMER* timer = al_create_timer(1.0 / 60.0);
     testa_init(timer, "timer");
 
+    ALLEGRO_TIMER* timer_player = al_create_timer(1.0 / 8.0);
+    testa_init(timer, "timer 2");
+
     ALLEGRO_EVENT_QUEUE* queue = al_create_event_queue();
     testa_init(queue, "queue");
 
-    ALLEGRO_DISPLAY* disp = al_create_display(wid, hei);
+    ALLEGRO_DISPLAY* disp = inicializa_tela(1440, 720);
     testa_init(disp, "display");
+
+    ALLEGRO_TRANSFORM t = setup_transform(disp);
 
     ALLEGRO_FONT* font = al_create_builtin_font();
     testa_init(font, "addon de fonte");
 
-    ALLEGRO_BITMAP* sprites = al_load_bitmap("./resources/spritesheet.png");
+    t_sprites* sprites = carrega_sprites;
     testa_init(sprites, "sprites");
 
     ALLEGRO_BITMAP* wall = al_load_bitmap("./resources/steel.png");
     testa_init(wall, "parede");
 
-    ALLEGRO_BITMAP* rockford = al_create_sub_bitmap(sprites, 0, 0, 16, 16);
+    // ALLEGRO_BITMAP* rockford = al_create_sub_bitmap(sprites, 0, 0, 16, 16);
 
     ALLEGRO_KEYBOARD_STATE ks;
 
     al_register_event_source(queue, al_get_keyboard_event_source());
     al_register_event_source(queue, al_get_display_event_source(disp));
     al_register_event_source(queue, al_get_timer_event_source(timer));
+    al_register_event_source(queue, al_get_timer_event_source(timer_player));
 
     bool feito = false;
     bool redraw = true;
     ALLEGRO_EVENT event;
 
     al_start_timer(timer);
+    al_start_timer(timer_player);
     inicializa_jogo(area, &player);
 
     while(1){
@@ -199,19 +192,32 @@ int main(int argc, char *argv[]){
 
         switch(event.type){
             case ALLEGRO_EVENT_TIMER:
-                if((key[ALLEGRO_KEY_UP] || key[ALLEGRO_KEY_W]) && player.y > 1)
-                    player.y--;
-                if((key[ALLEGRO_KEY_DOWN] || key[ALLEGRO_KEY_S]) && player.y < LIN-3)
-                    player.y++;
-                if((key[ALLEGRO_KEY_LEFT] || key[ALLEGRO_KEY_A]) && player.x > 1)
-                    player.x--;
-                if((key[ALLEGRO_KEY_RIGHT] || key[ALLEGRO_KEY_D]) && player.x < COL-2)
-                    player.x++;
+                if(event.timer.source == timer_player){
+                    if((key[ALLEGRO_KEY_UP] || key[ALLEGRO_KEY_W]) && !colisao(area, UP, player))
+                        player.y--;
+                    if((key[ALLEGRO_KEY_DOWN] || key[ALLEGRO_KEY_S]) && !colisao(area, DOWN, player))
+                        player.y++;
+                    if((key[ALLEGRO_KEY_LEFT] || key[ALLEGRO_KEY_A]) && !colisao(area, LEFT, player))
+                        player.x--;
+                    if((key[ALLEGRO_KEY_RIGHT] || key[ALLEGRO_KEY_D]) && !colisao(area, RIGHT, player))
+                        player.x++;
+                    if(area[player.y][player.x].tipo == Dirt){
+                        area[player.y][player.x].tipo = Empty;
+                        if(area[player.y-1][player.x].tipo == Rock){
+                            area[player.y][player.x].tipo = Rock;
+                            area[player.y-1][player.x].tipo = Empty;
+                        }
+                    }
+                    if(area[player.y][player.x].tipo == Diamond){
+                        area[player.y][player.x].tipo = Empty;
+                        player.score+=10;
+                    }    
+                }
+
                 if(key[ALLEGRO_KEY_ESCAPE])
                     exit(0);
                 for(int i = 0; i < ALLEGRO_KEY_MAX; i++)
                     key[i] &= KEY_SEEN;
-
                 redraw = true;
                 break;
 
@@ -231,7 +237,7 @@ int main(int argc, char *argv[]){
             al_clear_to_color(al_map_rgb(0, 0, 0));
             al_draw_text(font, al_map_rgb(255, 255, 255), wid/2, hei/2, 0, "Hello world!");
             desenha_jogo(area, sprites);
-            al_draw_bitmap(rockford, player.x*16, player.y*16, 0);
+            // al_draw_bitmap(rockford, player.x*16, player.y*16, 0);
             al_flip_display();
 
             redraw = false;
