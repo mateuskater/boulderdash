@@ -22,7 +22,7 @@ typedef struct level{
 
 typedef struct jogador{
     int x, y;
-    int vivo, score;
+    int vivo, score, dir;
 }jogador;
 
 typedef struct tile{

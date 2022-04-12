@@ -3,7 +3,7 @@
 #include "init_sprites.h"
 
 typedef struct nodo{
-    int dir, att, x, y; //att = se precisa atualizar ou não
+    int movendo, att, x, y; //att = se precisa atualizar ou não
     struct nodo *next;
 }nodo;
 
