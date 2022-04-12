@@ -19,10 +19,11 @@ tile **aloca_area(int lin, int col){
     return area;
 }
 
-void inicializa_jogo(tile **area, jogador *player, nodo *pedras){
+void inicializa_jogo(tile **area, jogador *player, nodo **pedras){
     int i, j;
     char aux;
-    ALLEGRO_FILE *level = al_fopen("./resources/level1.txt", "r");
+    ALLEGRO_FILE *level = al_fopen("./resources/level3.txt", "r");
+    nodo *nova_pedra;
 
     for(i = 0; i < LIN; i++)
         for(j = 0; j < COL; j++){
@@ -40,7 +41,8 @@ void inicializa_jogo(tile **area, jogador *player, nodo *pedras){
                         break;
                     case 'r':
                         area[i][j].tipo = Rock;
-                        insere(pedras, STILL, 1, j, i);
+                        nova_pedra = cria_nodo(STILL, 0, j, i);
+                        *pedras = insere_nodo(pedras, nova_pedra);
                         break;
                     case '.':
                         area[i][j].tipo = Dirt;
@@ -55,6 +57,8 @@ void inicializa_jogo(tile **area, jogador *player, nodo *pedras){
                         break;
                     case ' ':
                         area[i][j].tipo = Empty;
+                        break;
+                    case '\n':
                         break;
                 }
             }else j--;
@@ -95,10 +99,9 @@ void desenha_jogo(tile **area, t_sprites sprites){
                     al_draw_bitmap(sprites.dirt, j*16, i*16, 0);
                     break;
                 case Player:
-                    al_draw_bitmap(sprites.player[0], j*16, i*16, 0);
                     break;
                 case Rock:
-                    // al_draw_bitmap(sprites.rock, j*16, i*16, 0);
+                    //al_draw_bitmap(sprites.rock, j*16, i*16, 0);
                     break;
                 case Exit:
                     al_draw_bitmap(sprites.rock, j*16, i*16, 0);
@@ -120,7 +123,7 @@ void testa_init(bool test, const char *objeto){
 }
 
 int main(int argc, char *argv[]){
-    int wid, hei, i;
+    int wid, hei, prev_x, prev_y; //largura, altura, posiçao anterior do player
     jogador player;
     unsigned char key[ALLEGRO_KEY_MAX];
     tile **area;
@@ -177,8 +180,8 @@ int main(int argc, char *argv[]){
 
     al_start_timer(timer);
     al_start_timer(timer_player);
-    inicializa_jogo(area, &player, pedras);
-
+    inicializa_jogo(area, &player, &pedras);
+    atualiza_pedras(&pedras, area, sprites);
     while(1){
         al_wait_for_event(queue, &event);
         al_get_keyboard_state(&ks);
@@ -186,6 +189,8 @@ int main(int argc, char *argv[]){
         switch(event.type){
             case ALLEGRO_EVENT_TIMER:
                 if(event.timer.source == timer_player){
+                    prev_x = player.x;
+                    prev_y = player.y;
                     if((key[ALLEGRO_KEY_UP] || key[ALLEGRO_KEY_W]) && !colisao(area, UP, player))
                         player.y--;
                     if((key[ALLEGRO_KEY_DOWN] || key[ALLEGRO_KEY_S]) && !colisao(area, DOWN, player))
@@ -194,17 +199,20 @@ int main(int argc, char *argv[]){
                         player.x--;
                     if((key[ALLEGRO_KEY_RIGHT] || key[ALLEGRO_KEY_D]) && !colisao(area, RIGHT, player))
                         player.x++;
-                    if(area[player.y][player.x].tipo == Dirt){
-                        area[player.y][player.x].tipo = Empty;
-                        if(area[player.y-1][player.x].tipo == Rock){
-                            area[player.y][player.x].tipo = Rock;
-                            area[player.y-1][player.x].tipo = Empty;
-                        }
+
+                    if(prev_x != player.x || prev_y != player.y){ // se a posicao atual for diferente da anterior, atualiza os conteudos
+                        area[player.y][player.x].tipo = Player;
+                        area[prev_y][prev_x].tipo = Empty;
                     }
-                    if(area[player.y][player.x].tipo == Diamond){
+                    // area[player.y][player.x].tipo = Player;
+                    // area[prev_y][prev_x].tipo = Empty;
+                    atualiza_pedras(&pedras, area, sprites);
+                    if(area[player.y][player.x].tipo == Dirt)
                         area[player.y][player.x].tipo = Empty;
-                        player.score+=10;
-                    }    
+                }
+                if(area[player.y][player.x].tipo == Diamond){
+                    area[player.y][player.x].tipo = Empty;
+                    player.score+=10;
                 }
 
                 if(key[ALLEGRO_KEY_ESCAPE])
@@ -230,8 +238,8 @@ int main(int argc, char *argv[]){
             al_clear_to_color(al_map_rgb(0, 0, 0));
             al_draw_text(font, al_map_rgb(255, 255, 255), wid/2, hei/2, 0, "Hello world!");
             desenha_jogo(area, sprites);
-            desenha_pedras(pedras, sprites);
             al_draw_bitmap(sprites.player[0], player.x*16, player.y*16, 0);
+            desenha_pedras(pedras, sprites);
             al_flip_display();
 
             redraw = false;
@@ -242,6 +250,7 @@ int main(int argc, char *argv[]){
     al_destroy_timer(timer);
     al_destroy_event_queue(queue);
     free(area);
+    destroi_lista(pedras);
 
     return 0;
 }

@@ -6,27 +6,31 @@
 #include "init_sprites.h"
 
 nodo *inicializa_lista(){
-    nodo *ini = NULL;
+    nodo *ini = malloc(sizeof(nodo));
     return ini;
 }
 
-void insere(nodo *ini, int dir, int att, int x, int y){
+nodo *cria_nodo(int dir, int att, int x, int y){
     nodo *new = malloc(sizeof(nodo));
-    if(ini == NULL)
-        ini = new;
     new->dir = dir;
     new->att = att;
     new->x = x;
     new->y = y;
-    new->next = ini;
-    ini = new;
+    new->next = NULL;
+    return new;
 }
 
-int deleta(nodo *ini, nodo *select){
+nodo *insere_nodo(nodo **ini, nodo *input){
+    input->next = *ini;
+    *ini = input;
+    return input;
+}
+
+int deleta_nodo(nodo *ini, nodo *select){
     nodo *aux = ini, *temp = NULL;
     while(aux->next != select){
         aux->next = aux;
-        if(aux->next == NULL)
+        if(aux == NULL)
             return 1;
     }
     temp = aux->next;
@@ -38,15 +42,38 @@ int deleta(nodo *ini, nodo *select){
 void desenha_pedras(nodo *ini, t_sprites sprites){
     nodo *aux = ini;
     while(aux != NULL){
-        al_draw_bitmap(sprites.rock, aux->x, aux->y, 0);
+        al_draw_bitmap(sprites.rock, aux->x*16, aux->y*16, 0);
+        aux = aux->next;
     }
 }
 
-void atualiza_pedras(nodo *ini, tile **area, t_sprites sprites, int x, int y){
-    nodo *aux = ini;
-    while(aux->y != y && aux->x != x)
+void atualiza_pedras(nodo **ini, tile **area, t_sprites sprites){
+    nodo *aux = *ini;
+    while(aux->next != NULL){
+        if (area[aux->y+1][aux->x].tipo == Empty){
+            area[aux->y+1][aux->x].tipo = Rock;
+            area[aux->y][aux->x].tipo = Empty;
+            aux->y++;
+        }
+        if(area[aux->y+1][aux->x].tipo == Rock && area[aux->y][aux->x+1].tipo == Empty && area[aux->y+1][aux->x+1].tipo == Empty){
+            area[aux->y][aux->x+1].tipo = Rock;
+            area[aux->y][aux->x].tipo = Empty;
+            aux->x++;
+        }else if(area[aux->y+1][aux->x].tipo == Rock && area[aux->y][aux->x-1].tipo == Empty && area[aux->y+1][aux->x-1].tipo == Empty){
+            area[aux->y][aux->x-1].tipo = Rock;
+            area[aux->y][aux->x].tipo = Empty;
+            aux->x--;
+        }
+
         aux = aux->next;
-    aux->att = 1;
-    if (area[aux->y+1][aux->x].tipo == Empty)
-        aux->y++;
+    }
+}
+
+void destroi_lista(nodo *ini){
+    nodo *aux = ini, *temp = ini;
+    while(aux != NULL){
+        aux = aux->next;
+        free(temp);
+        temp = aux;
+    }
 }
