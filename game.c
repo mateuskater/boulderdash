@@ -22,7 +22,7 @@ tile **aloca_area(int lin, int col){
 void inicializa_jogo(tile **area, jogador *player, nodo **pedras){
     int i, j;
     char aux;
-    ALLEGRO_FILE *level = al_fopen("./resources/level3.txt", "r");
+    ALLEGRO_FILE *level = al_fopen("./resources/level2.txt", "r");
     nodo *nova_pedra;
 
     for(i = 0; i < LIN; i++)
@@ -131,7 +131,7 @@ void morte(jogador player, t_sprites sprites, ALLEGRO_TIMER *t){
             }
 }
 int main(int argc, char *argv[]){
-    int wid, hei, prev_x, prev_y, m, f; //largura, altura, posiçao anterior do player
+    int wid, hei, prev_x, prev_y, m = 0, f; //largura, altura, posiçao anterior do player
     jogador player;
     unsigned char key[ALLEGRO_KEY_MAX];
     tile **area;
@@ -160,7 +160,7 @@ int main(int argc, char *argv[]){
     ALLEGRO_TIMER* timer_player = al_create_timer(1.0 / 8.0);
     testa_init(timer_player, "timer 2");
 
-    ALLEGRO_TIMER* timer_game = al_create_timer(1.0);
+    ALLEGRO_TIMER* timer_game = al_create_timer(1.0 / 15.0);
     testa_init(timer_game, "timer do jogo");
 
     ALLEGRO_EVENT_QUEUE* queue = al_create_event_queue();
@@ -191,6 +191,7 @@ int main(int argc, char *argv[]){
 
     al_start_timer(timer_fps);
     al_start_timer(timer_player);
+    al_start_timer(timer_game);
     inicializa_jogo(area, &player, &pedras);
     atualiza_pedras(&pedras, area, sprites);
     while(1){
@@ -199,6 +200,9 @@ int main(int argc, char *argv[]){
 
         switch(event.type){
             case ALLEGRO_EVENT_TIMER:
+                if(event.timer.source == timer_game){
+                    m = f % 7;
+                }
                 if(event.timer.source == timer_player){
                     prev_x = player.x;
                     prev_y = player.y;
@@ -233,7 +237,6 @@ int main(int argc, char *argv[]){
                     }
                     if(area[player.y][player.x].tipo == Dirt) //cava
                         area[player.y][player.x].tipo = Empty;
-                    
                 }
                 if(area[player.y][player.x].tipo == Diamond){ // coleta diamante
                     area[player.y][player.x].tipo = Empty;
@@ -263,7 +266,6 @@ int main(int argc, char *argv[]){
             al_clear_to_color(al_map_rgb(0, 0, 0));
             al_draw_text(font, al_map_rgb(255, 255, 255), wid/2, hei/2, 0, "Hello world!");
             desenha_mapa(area, sprites);
-            m = f % 7;
             if (player.dir == STILL){
                 al_draw_bitmap(sprites.player[m], player.x*16, player.y*16, 0);
                 f++;
