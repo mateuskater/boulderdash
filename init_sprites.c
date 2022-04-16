@@ -9,15 +9,12 @@ t_sprites carrega_sprites(void){
     t_sprites sprites;
     ALLEGRO_BITMAP* sheet = al_load_bitmap("./resources/spritesheet.png");
     
-    for (i = 0; i < 7; i++)
+    for (i = 0; i < 7; i++){
         sprites.player[i] = al_create_sub_bitmap(sheet, i*16, 0, 16, 16);
-
-    for (i = 0; i < 7; i++)
         sprites.player_left[i] = al_create_sub_bitmap(sheet, i*16, 16, 16, 16);
-
-    for (i = 0; i < 7; i++)
         sprites.player_right[i] = al_create_sub_bitmap(sheet, i*16, 32, 16, 16);
-
+    }
+    
     sprites.wall = al_create_sub_bitmap(sheet, 0, 48, 16, 16);
     sprites.brick = al_create_sub_bitmap(sheet, 32, 48, 16, 16);
 
@@ -33,5 +30,12 @@ t_sprites carrega_sprites(void){
 
     sprites.dirt = al_create_sub_bitmap(sheet, 48, 48, 16, 16);
     sprites.rock = al_create_sub_bitmap(sheet, 80, 48, 16, 16);
+
+    for(i = 0; i < 7; i++){
+        al_convert_mask_to_alpha(sprites.player[i], al_map_rgba(18, 23, 18, 1));
+        al_convert_mask_to_alpha(sprites.player_left[i], al_map_rgba(18, 23, 18, 1));
+        al_convert_mask_to_alpha(sprites.player_right[i], al_map_rgba(18, 23, 18, 1));
+    }
+
     return sprites;
 }

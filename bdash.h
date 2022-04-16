@@ -30,6 +30,10 @@ typedef struct tile{
     int movendo;
 }tile;
 
+typedef struct jogo{
+    int n_level, d_restantes, t_restante; 
+}jogo;
+
 ALLEGRO_DISPLAY *inicializa_tela(int w, int h);
 ALLEGRO_TRANSFORM setup_transform(ALLEGRO_DISPLAY *disp);
 

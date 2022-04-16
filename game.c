@@ -84,6 +84,16 @@ int colisao(tile **area, int direcao, jogador player){
     
     return 0;
 }
+
+void empurra(tile **area, int dir){
+
+
+}
+
+void reseta_level(){
+
+}
+
 void desenha_mapa(tile **area, t_sprites sprites){
     int i, j;
 
@@ -130,6 +140,7 @@ void morte(jogador player, t_sprites sprites, ALLEGRO_TIMER *t){
                 al_draw_bitmap(sprites.morte[f], player.x+j,player.y+i, 0);
             }
 }
+
 int main(int argc, char *argv[]){
     int wid, hei, prev_x, prev_y, m = 0, f; //largura, altura, posiçao anterior do player
     jogador player;
@@ -166,7 +177,7 @@ int main(int argc, char *argv[]){
     ALLEGRO_EVENT_QUEUE* queue = al_create_event_queue();
     testa_init(queue, "queue");
 
-    ALLEGRO_DISPLAY* disp = inicializa_tela(1440, 720);
+    ALLEGRO_DISPLAY* disp = inicializa_tela(DEFAULT_WIDTH*2, DEFAULT_HEIGHT*2);
     testa_init(disp, "display");
 
     ALLEGRO_TRANSFORM t = setup_transform(disp);
@@ -176,14 +187,13 @@ int main(int argc, char *argv[]){
 
     t_sprites sprites = carrega_sprites();
 
-    // ALLEGRO_BITMAP* rockford = al_create_sub_bitmap(sprites, 0, 0, 16, 16);
-
     ALLEGRO_KEYBOARD_STATE ks;
 
     al_register_event_source(queue, al_get_keyboard_event_source());
     al_register_event_source(queue, al_get_display_event_source(disp));
     al_register_event_source(queue, al_get_timer_event_source(timer_fps));
     al_register_event_source(queue, al_get_timer_event_source(timer_player));
+    al_register_event_source(queue, al_get_timer_event_source(timer_game));
 
     bool feito = false;
     bool redraw = true;
@@ -192,9 +202,13 @@ int main(int argc, char *argv[]){
     al_start_timer(timer_fps);
     al_start_timer(timer_player);
     al_start_timer(timer_game);
+    
     inicializa_jogo(area, &player, &pedras);
     atualiza_pedras(&pedras, area, sprites);
-    while(1){
+
+
+
+    while(1){ // game loop
         al_wait_for_event(queue, &event);
         al_get_keyboard_state(&ks);
 
