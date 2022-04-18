@@ -10,10 +10,9 @@ nodo *inicializa_lista(){
     return ini;
 }
 
-nodo *cria_nodo(int movendo, int att, int x, int y){
+nodo *cria_nodo(int caindo, int x, int y){
     nodo *new = malloc(sizeof(nodo));
-    new->movendo = movendo;
-    new->att = att;
+    new->caindo = caindo;
     new->x = x;
     new->y = y;
     new->next = NULL;
@@ -47,16 +46,29 @@ void desenha_pedras(nodo *ini, t_sprites sprites){
     }
 }
 
-void atualiza_pedras(nodo **ini, tile **area, t_sprites sprites){
+nodo *busca_nodo(nodo* ini, int x, int y){
+    nodo *aux = ini;
+
+    while(aux->x != x && aux->y != y && aux->next != NULL)
+        aux = aux->next;
+    if(aux->x == x && aux->y == y)
+        return aux;
+    else
+        return NULL;
+}
+
+int atualiza_pedras(nodo **ini, tile **area, t_sprites sprites){
     nodo *aux = *ini;
+
     while(aux->next != NULL){
+        if (area[aux->y+1][aux->x].tipo == Player && aux->caindo == 1)
+            return 1;
         if (area[aux->y+1][aux->x].tipo == Empty){
-            aux->movendo = 1;
+            aux->caindo = 1;
             area[aux->y+1][aux->x].tipo = Rock;
             area[aux->y][aux->x].tipo = Empty;
             aux->y++;
-        }
-        if( (area[aux->y+1][aux->x].tipo == Rock || area[aux->y+1][aux->x].tipo == Brick) && area[aux->y][aux->x+1].tipo == Empty && area[aux->y+1][aux->x+1].tipo == Empty){
+        }else if( (area[aux->y+1][aux->x].tipo == Rock || area[aux->y+1][aux->x].tipo == Brick) && area[aux->y][aux->x+1].tipo == Empty && area[aux->y+1][aux->x+1].tipo == Empty){
             area[aux->y][aux->x+1].tipo = Rock; // caso direita e diagonal inferior direita estejam livres
             area[aux->y][aux->x].tipo = Empty; // pedra desliza para a direita
             aux->x++;
@@ -64,9 +76,10 @@ void atualiza_pedras(nodo **ini, tile **area, t_sprites sprites){
             area[aux->y][aux->x-1].tipo = Rock; //caso esquerda e diagonal inferior esquerda estejam livres
             area[aux->y][aux->x].tipo = Empty; // pedra desliza para a esquerda
             aux->x--;
-        }
+        }else aux->caindo = 0;
         aux = aux->next;
     }
+    return 0;
 }
 
 void destroi_lista(nodo *ini){

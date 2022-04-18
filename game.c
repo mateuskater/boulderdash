@@ -22,7 +22,7 @@ tile **aloca_area(int lin, int col){
 void inicializa_jogo(tile **area, jogador *player, nodo **pedras){
     int i, j;
     char aux;
-    ALLEGRO_FILE *level = al_fopen("./resources/level2.txt", "r");
+    ALLEGRO_FILE *level = al_fopen("./resources/level4.txt", "r");
     nodo *nova_pedra;
 
     for(i = 0; i < LIN; i++)
@@ -41,7 +41,7 @@ void inicializa_jogo(tile **area, jogador *player, nodo **pedras){
                         break;
                     case 'r':
                         area[i][j].tipo = Rock;
-                        nova_pedra = cria_nodo(0, 0, j, i);
+                        nova_pedra = cria_nodo(0, j, i);
                         *pedras = insere_nodo(pedras, nova_pedra);
                         break;
                     case '.':
@@ -147,6 +147,7 @@ int main(int argc, char *argv[]){
     unsigned char key[ALLEGRO_KEY_MAX];
     tile **area;
     nodo *pedras = inicializa_lista();
+    nodo *pedra_acima = NULL;
 
     memset(key, 0, sizeof(key));
     
@@ -168,11 +169,14 @@ int main(int argc, char *argv[]){
     ALLEGRO_TIMER* timer_fps = al_create_timer(1.0 / 60.0);
     testa_init(timer_fps, "timer fps");
 
-    ALLEGRO_TIMER* timer_player = al_create_timer(1.0 / 8.0);
-    testa_init(timer_player, "timer 2");
+    ALLEGRO_TIMER* timer_player = al_create_timer(1.0 / 10.0);
+    testa_init(timer_player, "timer do player");
 
-    ALLEGRO_TIMER* timer_game = al_create_timer(1.0 / 15.0);
-    testa_init(timer_game, "timer do jogo");
+    ALLEGRO_TIMER* timer_anim = al_create_timer(1.0 / 7.0);
+    testa_init(timer_anim, "timer do jogo");
+
+    ALLEGRO_TIMER* timer_pedras = al_create_timer(1.0 / 20.0);
+
 
     ALLEGRO_EVENT_QUEUE* queue = al_create_event_queue();
     testa_init(queue, "queue");
@@ -193,7 +197,7 @@ int main(int argc, char *argv[]){
     al_register_event_source(queue, al_get_display_event_source(disp));
     al_register_event_source(queue, al_get_timer_event_source(timer_fps));
     al_register_event_source(queue, al_get_timer_event_source(timer_player));
-    al_register_event_source(queue, al_get_timer_event_source(timer_game));
+    al_register_event_source(queue, al_get_timer_event_source(timer_anim));
 
     bool feito = false;
     bool redraw = true;
@@ -201,7 +205,8 @@ int main(int argc, char *argv[]){
 
     al_start_timer(timer_fps);
     al_start_timer(timer_player);
-    al_start_timer(timer_game);
+    al_start_timer(timer_anim);
+    al_start_timer(timer_pedras);
     
     inicializa_jogo(area, &player, &pedras);
     atualiza_pedras(&pedras, area, sprites);
@@ -214,9 +219,10 @@ int main(int argc, char *argv[]){
 
         switch(event.type){
             case ALLEGRO_EVENT_TIMER:
-                if(event.timer.source == timer_game){
+                if(event.timer.source == timer_anim){
                     m = f % 7;
                 }
+
                 if(event.timer.source == timer_player){
                     prev_x = player.x;
                     prev_y = player.y;
@@ -245,16 +251,22 @@ int main(int argc, char *argv[]){
                         area[player.y][player.x].tipo = Player;
                         area[prev_y][prev_x].tipo = Empty;
                     }
-                    atualiza_pedras(&pedras, area, sprites);
-                    if(area[player.y-1][player.x].tipo == Rock){
-                        morte(player, sprites, timer_player);
-                    }
+
                     if(area[player.y][player.x].tipo == Dirt) //cava
                         area[player.y][player.x].tipo = Empty;
+                        
+                    if(area[player.y][player.x].tipo == Diamond){ // coleta diamante
+                        area[player.y][player.x].tipo = Empty;
+                        player.score+=10;
+                    }
                 }
-                if(area[player.y][player.x].tipo == Diamond){ // coleta diamante
-                    area[player.y][player.x].tipo = Empty;
-                    player.score+=10;
+
+                if(event.timer.source == timer_pedras){
+                    pedra_acima = busca_nodo(pedras, player.x, player.y-1);
+                    if(atualiza_pedras(&pedras, area, sprites)){
+                        morte(player, sprites, timer_player);
+                        // al_stop_timer(timer_player);
+                    }
                 }
 
                 if(key[ALLEGRO_KEY_ESCAPE])
@@ -300,7 +312,7 @@ int main(int argc, char *argv[]){
     al_destroy_display(disp);
     al_destroy_timer(timer_fps);
     al_destroy_timer(timer_player);
-    al_destroy_timer(timer_game);
+    al_destroy_timer(timer_anim);
     al_destroy_event_queue(queue);
     free(area);
     destroi_lista(pedras);

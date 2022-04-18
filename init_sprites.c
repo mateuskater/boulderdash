@@ -32,10 +32,11 @@ t_sprites carrega_sprites(void){
     sprites.rock = al_create_sub_bitmap(sheet, 80, 48, 16, 16);
 
     for(i = 0; i < 7; i++){
-        al_convert_mask_to_alpha(sprites.player[i], al_map_rgba(18, 23, 18, 1));
-        al_convert_mask_to_alpha(sprites.player_left[i], al_map_rgba(18, 23, 18, 1));
-        al_convert_mask_to_alpha(sprites.player_right[i], al_map_rgba(18, 23, 18, 1));
+        al_convert_mask_to_alpha(sprites.player[i], al_map_rgb(18, 23, 18));
+        al_convert_mask_to_alpha(sprites.player_left[i], al_map_rgb(18, 23, 18));
+        al_convert_mask_to_alpha(sprites.player_right[i], al_map_rgb(18, 23, 18));
     }
+    al_convert_mask_to_alpha(sprites.rock, al_map_rgb(18, 23, 18));
 
     return sprites;
 }
