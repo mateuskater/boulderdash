@@ -175,8 +175,7 @@ int main(int argc, char *argv[]){
     ALLEGRO_TIMER* timer_anim = al_create_timer(1.0 / 7.0);
     testa_init(timer_anim, "timer do jogo");
 
-    ALLEGRO_TIMER* timer_pedras = al_create_timer(1.0 / 20.0);
-
+    ALLEGRO_TIMER* timer_pedras = al_create_timer(1.0 / 3.0);
 
     ALLEGRO_EVENT_QUEUE* queue = al_create_event_queue();
     testa_init(queue, "queue");
@@ -191,17 +190,69 @@ int main(int argc, char *argv[]){
 
     t_sprites sprites = carrega_sprites();
 
+    ALLEGRO_BITMAP *gato = al_load_bitmap("./resources/gato.png");
+    testa_init(gato, "gatin");
+
     ALLEGRO_KEYBOARD_STATE ks;
+
+    ALLEGRO_EVENT_QUEUE* qmenu = al_create_event_queue();
 
     al_register_event_source(queue, al_get_keyboard_event_source());
     al_register_event_source(queue, al_get_display_event_source(disp));
-    al_register_event_source(queue, al_get_timer_event_source(timer_fps));
-    al_register_event_source(queue, al_get_timer_event_source(timer_player));
-    al_register_event_source(queue, al_get_timer_event_source(timer_anim));
+
+    al_register_event_source(qmenu, al_get_keyboard_event_source());
+    al_register_event_source(qmenu, al_get_display_event_source(disp));
 
     bool feito = false;
     bool redraw = true;
     ALLEGRO_EVENT event;
+
+    int alturaGato = al_get_bitmap_height(gato);
+    int larguraGato = al_get_bitmap_width(gato);
+
+    al_clear_to_color(al_map_rgb(0, 0, 0));
+    
+    int w = 100, flagBreak = 0;
+
+    while(1){
+
+        al_draw_scaled_bitmap(gato, 0, 0, larguraGato, alturaGato, 100, 50, larguraGato/3, alturaGato/3, 0);
+        al_draw_text(font, al_map_rgb(0, 255, 255), 50, 100, 0, "Pressione tecla");
+        al_flip_display();
+
+        al_wait_for_event(qmenu, &event);
+        al_get_keyboard_state(&ks);
+        
+        if (event.type == ALLEGRO_EVENT_KEY_CHAR) {
+            switch(event.keyboard.keycode){
+            case ALLEGRO_KEY_ESCAPE:
+                exit(0);
+                break;
+            case ALLEGRO_KEY_BACKSPACE:
+                exit(0);
+                break;
+            case ALLEGRO_KEY_ENTER:
+                al_draw_text(font, al_map_rgb(0, 255, 255), 80, w, 0, "Obrgiado");
+                w+=10;
+                break;
+            case ALLEGRO_KEY_SPACE:
+                flagBreak = 1;
+                break;
+            default :
+                /// Add character to our string
+                break;
+            }
+        } 
+        if (flagBreak){
+            al_destroy_event_queue(qmenu);
+            break;
+        }
+    }
+
+    al_register_event_source(queue, al_get_timer_event_source(timer_fps));
+    al_register_event_source(queue, al_get_timer_event_source(timer_player));
+    al_register_event_source(queue, al_get_timer_event_source(timer_anim));
+    al_register_event_source(queue, al_get_timer_event_source(timer_pedras));
 
     al_start_timer(timer_fps);
     al_start_timer(timer_player);
@@ -210,8 +261,6 @@ int main(int argc, char *argv[]){
     
     inicializa_jogo(area, &player, &pedras);
     atualiza_pedras(&pedras, area, sprites);
-
-
 
     while(1){ // game loop
         al_wait_for_event(queue, &event);
@@ -288,7 +337,7 @@ int main(int argc, char *argv[]){
                 exit(0);
         }
 
-        if(redraw && al_is_event_queue_empty(queue)){
+        if(redraw && al_is_event_queue_empty(queue) && event.timer.source == timer_fps){
             al_clear_to_color(al_map_rgb(0, 0, 0));
             al_draw_text(font, al_map_rgb(255, 255, 255), wid/2, hei/2, 0, "Hello world!");
             desenha_mapa(area, sprites);
@@ -304,7 +353,6 @@ int main(int argc, char *argv[]){
             }
             desenha_pedras(pedras, sprites);
             al_flip_display();
-
             redraw = false;
         }
     }
