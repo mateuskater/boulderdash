@@ -26,7 +26,7 @@ typedef struct jogador{
 }jogador;
 
 typedef struct tile{
-    enum tipo{Empty = 0, Wall, Dirt, Player, Rock, Exit, Brick, Diamond}tipo;
+    enum{Empty = 0, Wall, Dirt, Player, Rock, Exit, Brick, Diamond}tipo;
     int movendo;
 }tile;
 

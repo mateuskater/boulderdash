@@ -19,10 +19,13 @@ tile **aloca_area(int lin, int col){
     return area;
 }
 
-void inicializa_jogo(tile **area, jogador *player, nodo **pedras){
+void inicializa_jogo(tile **area, jogador *player, nodo **pedras, int nlevel){
     int i, j;
     char aux;
-    ALLEGRO_FILE *level = al_fopen("./resources/level4.txt", "r");
+    char buf[128];
+
+    snprintf(buf, sizeof(buf), "./resources/level%d.txt", nlevel);
+    ALLEGRO_FILE *level = al_fopen(buf, "r");
     nodo *nova_pedra;
 
     for(i = 0; i < LIN; i++)
@@ -131,7 +134,7 @@ void testa_init(bool test, const char *objeto){
     exit(1);
 }
 
-void morte(jogador player, t_sprites sprites, ALLEGRO_TIMER *t){
+int morte(jogador player, t_sprites sprites, ALLEGRO_TIMER *t){
     int i,j,f = 0;
     // al_stop_timer(t);
     for (f = 0; f < 5; f++)
@@ -139,6 +142,7 @@ void morte(jogador player, t_sprites sprites, ALLEGRO_TIMER *t){
             for(j = -1; j <= 1; j++){
                 al_draw_bitmap(sprites.morte[f], player.x+j,player.y+i, 0);
             }
+    return 1;
 }
 
 int main(int argc, char *argv[]){
@@ -148,6 +152,7 @@ int main(int argc, char *argv[]){
     tile **area;
     nodo *pedras = inicializa_lista();
     nodo *pedra_acima = NULL;
+    int morto = 0;
 
     memset(key, 0, sizeof(key));
     
@@ -175,7 +180,7 @@ int main(int argc, char *argv[]){
     ALLEGRO_TIMER* timer_anim = al_create_timer(1.0 / 7.0);
     testa_init(timer_anim, "timer do jogo");
 
-    ALLEGRO_TIMER* timer_pedras = al_create_timer(1.0 / 3.0);
+    ALLEGRO_TIMER* timer_pedras = al_create_timer(1.0 / 5.0);
 
     ALLEGRO_EVENT_QUEUE* queue = al_create_event_queue();
     testa_init(queue, "queue");
@@ -258,11 +263,12 @@ int main(int argc, char *argv[]){
     al_start_timer(timer_player);
     al_start_timer(timer_anim);
     al_start_timer(timer_pedras);
-    
-    inicializa_jogo(area, &player, &pedras);
+
+    // while(1){    
+    inicializa_jogo(area, &player, &pedras, 1);
     atualiza_pedras(&pedras, area, sprites);
 
-    while(1){ // game loop
+    while(!morto){ // game loop
         al_wait_for_event(queue, &event);
         al_get_keyboard_state(&ks);
 
@@ -308,14 +314,14 @@ int main(int argc, char *argv[]){
                         area[player.y][player.x].tipo = Empty;
                         player.score+=10;
                     }
+                    
+                    if(pedra_acima != NULL && pedra_acima->caindo == 1)
+                        morto = morte(player, sprites, timer_player);
                 }
 
                 if(event.timer.source == timer_pedras){
                     pedra_acima = busca_nodo(pedras, player.x, player.y-1);
-                    if(atualiza_pedras(&pedras, area, sprites)){
-                        morte(player, sprites, timer_player);
-                        // al_stop_timer(timer_player);
-                    }
+                    atualiza_pedras(&pedras, area, sprites);
                 }
 
                 if(key[ALLEGRO_KEY_ESCAPE])

@@ -61,18 +61,26 @@ int atualiza_pedras(nodo **ini, tile **area, t_sprites sprites){
     nodo *aux = *ini;
 
     while(aux->next != NULL){
-        if (area[aux->y+1][aux->x].tipo == Player && aux->caindo == 1)
-            return 1;
+        // if (area[aux->y+1][aux->x].tipo == Player && aux->caindo == 1)
+            // return 1;
         if (area[aux->y+1][aux->x].tipo == Empty){
             aux->caindo = 1;
             area[aux->y+1][aux->x].tipo = Rock;
             area[aux->y][aux->x].tipo = Empty;
             aux->y++;
-        }else if( (area[aux->y+1][aux->x].tipo == Rock || area[aux->y+1][aux->x].tipo == Brick) && area[aux->y][aux->x+1].tipo == Empty && area[aux->y+1][aux->x+1].tipo == Empty){
+        }else if( (area[aux->y+1][aux->x].tipo == Rock || area[aux->y+1][aux->x].tipo == Brick) 
+                    && area[aux->y][aux->x+1].tipo == Empty 
+                    && area[aux->y+1][aux->x+1].tipo == Empty)
+        {
+
             area[aux->y][aux->x+1].tipo = Rock; // caso direita e diagonal inferior direita estejam livres
             area[aux->y][aux->x].tipo = Empty; // pedra desliza para a direita
             aux->x++;
-        }else if( (area[aux->y+1][aux->x].tipo == Rock || area[aux->y+1][aux->x].tipo == Brick) && area[aux->y][aux->x-1].tipo == Empty && area[aux->y+1][aux->x-1].tipo == Empty){
+        }else if((area[aux->y+1][aux->x].tipo == Rock || area[aux->y+1][aux->x].tipo == Brick)
+                    && area[aux->y][aux->x-1].tipo == Empty
+                    && area[aux->y+1][aux->x-1].tipo == Empty)
+        {
+
             area[aux->y][aux->x-1].tipo = Rock; //caso esquerda e diagonal inferior esquerda estejam livres
             area[aux->y][aux->x].tipo = Empty; // pedra desliza para a esquerda
             aux->x--;
