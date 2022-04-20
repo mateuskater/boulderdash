@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <allegro5/allegro.h>
 #include "bdash.h"
+#include "display.h"
 
 ALLEGRO_DISPLAY *inicializa_tela(int w, int h){
 	ALLEGRO_DISPLAY *disp = NULL;

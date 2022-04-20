@@ -1,13 +1,22 @@
 CFLAGS = -Wall -g
 LDLIBS = $$(pkg-config allegro-5 allegro_font-5 allegro_image-5 allegro_primitives-5 --cflags --libs)
 
-objs = game.o display.o lista_pedras.o init_sprites.o
+OBJS = game.o display.o lista.o init_sprites.o
 
 all: game
-game: $(objs)
+game: $(OBJS)
+
+game.o: game.c bdash.h
+	gcc -c game.c $(LDLIBS) $(CFLAGS)
+display.o: display.c display.h
+	gcc -c display.c $(LDLIBS) $(CFLAGS)
+lista.o: lista.c lista.h
+	gcc -c lista.c $(LDLIBS) $(CFLAGS)
+init_sprites.o: init_sprites.c init_sprites.h
+	gcc -c init_sprites.c $(LDLIBS) $(CFLAGS)
 
 clean:
-	-rm -f $(objs)
+	-rm -f $(OBJS)
 
 purge: clean
 	-rm -f game

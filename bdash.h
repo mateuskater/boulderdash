@@ -4,10 +4,7 @@
 #define KEY_SEEN 1
 #define KEY_RELEASED 2
 
-#define DEFAULT_WIDTH 640
-#define DEFAULT_HEIGHT 352
-
-#define LIN 23
+#define LIN 24
 #define COL 40
 
 #define STILL 0
@@ -16,13 +13,17 @@
 #define DOWN 3
 #define LEFT 4
 
+#define ESQUERDA -1
+#define DIREITA 1
+
+#define OFF 16 // offset para dar espaço ao HUD
 typedef struct level{
     int n_diams, n_rocks, time;
 }level;
 
 typedef struct jogador{
     int x, y;
-    int vivo, score, dir;
+    int score, dir;
 }jogador;
 
 typedef struct tile{
@@ -33,8 +34,5 @@ typedef struct tile{
 typedef struct jogo{
     int n_level, d_restantes, t_restante; 
 }jogo;
-
-ALLEGRO_DISPLAY *inicializa_tela(int w, int h);
-ALLEGRO_TRANSFORM setup_transform(ALLEGRO_DISPLAY *disp);
 
 #endif
