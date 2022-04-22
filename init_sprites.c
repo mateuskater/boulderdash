@@ -1,8 +1,7 @@
 #include <stdio.h>
 #include <allegro5/allegro.h>
-#include "bdash.h"
+#include "game.h"
 #include "init_sprites.h"
-
 
 t_sprites carrega_sprites(void){
     int i, j;
@@ -18,9 +17,14 @@ t_sprites carrega_sprites(void){
     sprites.wall = al_create_sub_bitmap(sheet, 0, 48, 16, 16);
     sprites.brick = al_create_sub_bitmap(sheet, 32, 48, 16, 16);
 
-    for(i = 0; i < 2; i++)
-        for(j = 0; j < 4; j++)
-            sprites.diamond[i+j] = al_create_sub_bitmap(sheet, i*16, 64+j*16, 16, 16);
+    sprites.diamond[0] = al_create_sub_bitmap(sheet, 0, 64, 16, 16);
+    sprites.diamond[1] = al_create_sub_bitmap(sheet, 0, 80, 16, 16);
+    sprites.diamond[2] = al_create_sub_bitmap(sheet, 0, 96, 16, 16);
+    sprites.diamond[3] = al_create_sub_bitmap(sheet, 0, 112, 16, 16);
+    sprites.diamond[4] = al_create_sub_bitmap(sheet, 16, 64, 16, 16);
+    sprites.diamond[5] = al_create_sub_bitmap(sheet, 16, 80, 16, 16);
+    sprites.diamond[6] = al_create_sub_bitmap(sheet, 16, 96, 16, 16);
+    sprites.diamond[7] = al_create_sub_bitmap(sheet, 16, 112, 16, 16);
     
     sprites.morte[0] = al_create_sub_bitmap(sheet, 112, 64, 16, 16);
     sprites.morte[1] = al_create_sub_bitmap(sheet, 112, 80, 16, 16);

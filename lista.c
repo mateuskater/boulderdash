@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <allegro5/allegro.h>
-#include "bdash.h"
+#include "game.h"
 #include "lista.h"
 #include "init_sprites.h"
 
@@ -25,10 +25,21 @@ nodo *insere_nodo(nodo **ini, nodo *input){
     return input;
 }
 
-int deleta_nodo(nodo *ini, nodo *select){
-    nodo *aux = ini, *temp = NULL;
+nodo *busca_nodo(nodo *ini, int x, int y){
+    nodo *aux = ini;
+
+    while(aux->x != x && aux->y != y && aux->next != NULL)
+        aux = aux->next;
+    if(aux->x == x && aux->y == y)
+        return aux;
+    else
+        return NULL;
+}
+
+int deleta_nodo(nodo **ini, nodo *select){
+    nodo *aux = *ini, *temp = NULL;
     while(aux->next != select){
-        aux->next = aux;
+        aux = aux->next;
         if(aux == NULL)
             return 1;
     }
@@ -54,23 +65,6 @@ void desenha_diamantes(nodo *ini, t_sprites sprites, int frame){
     }
 }
 
-nodo *busca_nodo(nodo *ini, int x, int y){
-    nodo *aux = ini;
-
-    while(aux->x != x && aux->y != y && aux->next != NULL)
-        aux = aux->next;
-    if(aux->x == x && aux->y == y)
-        return aux;
-    else
-        return NULL;
-}
-
-void deleta_nodo(nodo **ini, int x, int y){
-    nodo *aux = ini;
-    aux = busca_nodo(*ini, x, y);
-    
-}
-
 int rola(tile **area, nodo *atual, int dir){
 
     if((area[atual->y+1][atual->x].tipo == Rock || area[atual->y+1][atual->x].tipo == Brick || area[atual->y+1][atual->x].tipo == Diamond) 
@@ -83,10 +77,12 @@ int rola(tile **area, nodo *atual, int dir){
 int atualiza_objetos(nodo **ini, tile **area, t_sprites sprites, char item){
     nodo *aux = *ini;
     int objeto;
+
     if(item == 'd')
         objeto = Diamond;
     else if(item == 'r')
         objeto = Rock;
+
     while(aux->next != NULL){
         // if (area[aux->y+1][aux->x].tipo == Player && aux->caindo == 1)
             // return 1;
