@@ -1,7 +1,6 @@
 #ifndef BDASH_H
 #define BDASH_H
 
-#include "lista.h"
 #include "init_sprites.h"
 
 #define KEY_SEEN 1
@@ -19,11 +18,8 @@
 #define ESQUERDA -1
 #define DIREITA 1
 
+#define TEMPO_LIMITE 127
 #define OFF 16 // offset para dar espaço ao HUD
-
-typedef struct level{
-    int n_diams, n_rocks, time;
-}level;
 
 typedef struct jogador{
     int x, y;
@@ -35,7 +31,7 @@ typedef struct tile{
 }tile;
 
 typedef struct jogo{
-    int n_level, d_restantes, t_restante; 
+    int n_level, d_restantes, n_diams, t_restante; 
 }jogo;
 
 typedef struct nodo{
@@ -51,6 +47,6 @@ void move_player(tile **area, jogador *player, int dir);
 int empurra(tile **area, jogador *player, nodo *pedras, int dir);
 void desenha_mapa(tile **area, t_sprites sprites);
 void testa_init(bool test, const char *objeto);
-int morte(jogador player, t_sprites sprites, ALLEGRO_TIMER *t);
+int morte(jogador player, t_sprites sprites, int frame);
 
 #endif

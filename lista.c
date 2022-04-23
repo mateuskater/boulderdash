@@ -7,6 +7,7 @@
 
 nodo *inicializa_lista(){
     nodo *ini = malloc(sizeof(nodo));
+    ini->next = NULL;
     return ini;
 }
 
@@ -28,7 +29,7 @@ nodo *insere_nodo(nodo **ini, nodo *input){
 nodo *busca_nodo(nodo *ini, int x, int y){
     nodo *aux = ini;
 
-    while(aux->x != x && aux->y != y && aux->next != NULL)
+    while( (aux->x != x || aux->y != y) && aux->next != NULL)
         aux = aux->next;
     if(aux->x == x && aux->y == y)
         return aux;
@@ -49,6 +50,16 @@ int deleta_nodo(nodo **ini, nodo *select){
     return 0;
 }
 
+int conta_nodos(nodo *ini){
+    nodo *aux = ini;
+    int i = 1;
+    while(aux->next != NULL){
+        aux = aux->next;
+        i++;
+    }
+    return i;
+}
+
 void desenha_pedras(nodo *ini, t_sprites sprites){
     nodo *aux = ini;
     while(aux != NULL){
@@ -66,7 +77,6 @@ void desenha_diamantes(nodo *ini, t_sprites sprites, int frame){
 }
 
 int rola(tile **area, nodo *atual, int dir){
-
     if((area[atual->y+1][atual->x].tipo == Rock || area[atual->y+1][atual->x].tipo == Brick || area[atual->y+1][atual->x].tipo == Diamond) 
                     && area[atual->y][atual->x+dir].tipo == Empty // caso tenha brick, rock ou diamond em baixo
                     && area[atual->y+1][atual->x+dir].tipo == Empty)
@@ -105,11 +115,13 @@ int atualiza_objetos(nodo **ini, tile **area, t_sprites sprites, char item){
     return 0;
 }
 
-void destroi_lista(nodo *ini){
-    nodo *aux = ini, *temp = ini;
-    while(aux != NULL){
+void destroi_lista(nodo **ini){
+    nodo *aux = *ini, *temp = *ini;
+    while(aux->next != NULL){
         aux = aux->next;
         free(temp);
         temp = aux;
     }
+    free(temp);
+    *ini = NULL;
 }
