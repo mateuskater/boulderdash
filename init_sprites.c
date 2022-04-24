@@ -35,6 +35,8 @@ t_sprites carrega_sprites(void){
     sprites.dirt = al_create_sub_bitmap(sheet, 48, 48, 16, 16);
     sprites.rock = al_create_sub_bitmap(sheet, 80, 48, 16, 16);
 
+    sprites.exit = al_create_sub_bitmap(sheet, 16, 48, 16, 16);
+
     for(i = 0; i < 7; i++){
         al_convert_mask_to_alpha(sprites.player[i], al_map_rgb(18, 23, 18));
         al_convert_mask_to_alpha(sprites.player_left[i], al_map_rgb(18, 23, 18));

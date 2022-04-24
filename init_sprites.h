@@ -9,7 +9,8 @@ typedef struct sprites{
         *diamond[8],
         *morte[5],
         *dirt,
-        *rock;
+        *rock,
+        *exit;
 }t_sprites;
 
 t_sprites carrega_sprites(void);

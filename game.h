@@ -27,11 +27,12 @@ typedef struct jogador{
 }jogador;
 
 typedef struct tile{
-    enum{Empty = 0, Wall, Dirt, Player, Rock, Exit, Brick, Diamond}tipo;
+    enum{Empty = 0, Wall, Dirt, Player, Rock, SaidaFechada, SaidaAberta, Brick, Diamond}tipo;
 }tile;
 
 typedef struct jogo{
-    int n_level, d_restantes, n_diams, t_restante; 
+    int n_level, d_restantes, n_diams, t_restante;
+    int saida_x, saida_y; 
 }jogo;
 
 typedef struct nodo{
@@ -41,7 +42,7 @@ typedef struct nodo{
 }nodo;
 
 tile **aloca_area(int lin, int col);
-void inicializa_jogo(tile **area, jogador *player, nodo **pedras, nodo **diamantes, int nlevel);
+void inicializa_jogo(tile **area, jogador *player, nodo **pedras, nodo **diamantes, jogo *jogo);
 int colisao(tile **area, int direcao, jogador player);
 void move_player(tile **area, jogador *player, int dir);
 int empurra(tile **area, jogador *player, nodo *pedras, int dir);
