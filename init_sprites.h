@@ -10,7 +10,8 @@ typedef struct sprites{
         *morte[5],
         *dirt,
         *rock,
-        *exit;
+        *exit,
+        *prof;
 }t_sprites;
 
 t_sprites carrega_sprites(void);

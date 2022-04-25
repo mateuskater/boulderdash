@@ -8,6 +8,8 @@ t_sprites carrega_sprites(void){
     t_sprites sprites;
     ALLEGRO_BITMAP* sheet = al_load_bitmap("./resources/spritesheet.png");
     
+    al_set_new_bitmap_format(ALLEGRO_PIXEL_FORMAT_ANY_WITH_ALPHA);
+    
     for (i = 0; i < 7; i++){
         sprites.player[i] = al_create_sub_bitmap(sheet, i*16, 0, 16, 16);
         sprites.player_left[i] = al_create_sub_bitmap(sheet, i*16, 16, 16, 16);
@@ -36,6 +38,8 @@ t_sprites carrega_sprites(void){
     sprites.rock = al_create_sub_bitmap(sheet, 80, 48, 16, 16);
 
     sprites.exit = al_create_sub_bitmap(sheet, 16, 48, 16, 16);
+
+    sprites.prof = al_load_bitmap("./resources/menotti.png");
 
     for(i = 0; i < 7; i++){
         al_convert_mask_to_alpha(sprites.player[i], al_map_rgb(18, 23, 18));

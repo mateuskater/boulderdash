@@ -5,13 +5,13 @@
 #include "lista.h"
 #include "init_sprites.h"
 
-nodo *inicializa_lista(){
+nodo *inicializa_lista(){ // inicializa uma lista encadeada
     nodo *ini = malloc(sizeof(nodo));
     ini->next = NULL;
     return ini;
 }
 
-nodo *cria_nodo(int caindo, int x, int y){
+nodo *cria_nodo(int caindo, int x, int y){ // cria um nodo e o retorna
     nodo *new = malloc(sizeof(nodo));
     new->caindo = caindo;
     new->x = x;
@@ -20,13 +20,13 @@ nodo *cria_nodo(int caindo, int x, int y){
     return new;
 }
 
-nodo *insere_nodo(nodo **ini, nodo *input){
+nodo *insere_nodo(nodo **ini, nodo *input){ // insere na lista um nodo passado
     input->next = *ini;
     *ini = input;
     return input;
 }
 
-nodo *busca_nodo(nodo *ini, int x, int y){
+nodo *busca_nodo(nodo *ini, int x, int y){ // busca um nodo pelas coordenadas e o retorna
     nodo *aux = ini;
 
     while( (aux->x != x || aux->y != y) && aux->next != NULL)
@@ -37,7 +37,7 @@ nodo *busca_nodo(nodo *ini, int x, int y){
         return NULL;
 }
 
-int deleta_nodo(nodo **ini, nodo *select){
+int deleta_nodo(nodo **ini, nodo *select){ // deleta um nodo fornecido como parametro
     nodo *aux = *ini, *temp = NULL;
     while(aux->next != select){
         aux = aux->next;
@@ -50,7 +50,7 @@ int deleta_nodo(nodo **ini, nodo *select){
     return 0;
 }
 
-int conta_nodos(nodo *ini){
+int conta_nodos(nodo *ini){ // retorna a quantidade de nodos na lista
     nodo *aux = ini;
     int i = 1;
     while(aux->next != NULL){
@@ -60,7 +60,7 @@ int conta_nodos(nodo *ini){
     return i;
 }
 
-void desenha_pedras(nodo *ini, t_sprites sprites){
+void desenha_pedras(nodo *ini, t_sprites sprites){ // desenha todas as pedras da lista encadeada na tela
     nodo *aux = ini;
     while(aux != NULL){
         al_draw_bitmap(sprites.rock, aux->x*16, aux->y*16 + OFF, 0);
@@ -68,7 +68,7 @@ void desenha_pedras(nodo *ini, t_sprites sprites){
     }
 }
 
-void desenha_diamantes(nodo *ini, t_sprites sprites, int frame){
+void desenha_diamantes(nodo *ini, t_sprites sprites, int frame){ // desenha todos os diamantes da lista encadeada na tela
     nodo *aux = ini;
     while(aux != NULL){
         al_draw_bitmap(sprites.diamond[frame], aux->x*16, aux->y*16 + OFF, 0);
@@ -76,30 +76,30 @@ void desenha_diamantes(nodo *ini, t_sprites sprites, int frame){
     }
 }
 
-int rola(tile **area, nodo *atual, int dir){
+int rola(tile **area, nodo *atual, int dir){ // verifica se o objeto deve rolar
     if((area[atual->y+1][atual->x].tipo == Rock || area[atual->y+1][atual->x].tipo == Brick || area[atual->y+1][atual->x].tipo == Diamond) 
-                    && area[atual->y][atual->x+dir].tipo == Empty // caso tenha brick, rock ou diamond em baixo
-                    && area[atual->y+1][atual->x+dir].tipo == Empty)
-        return 1;
-    return 0;
+                && area[atual->y][atual->x+dir].tipo == Empty // caso tenha brick, rock ou diamond em baixo
+                && area[atual->y+1][atual->x+dir].tipo == Empty)
+        return 1; // rola
+    return 0; // não rola
 }
 
 int atualiza_objetos(nodo **ini, tile **area, t_sprites sprites, char item){
     nodo *aux = *ini;
     int objeto;
 
-    if(item == 'd')
-        objeto = Diamond;
+    if(item == 'd') //       aqui é passado um char para saber qual
+        objeto = Diamond; // objeto será atualizado, diamante ou pedra 
     else if(item == 'r')
         objeto = Rock;
 
     while(aux->next != NULL){
         // if (area[aux->y+1][aux->x].tipo == Player && aux->caindo == 1)
             // return 1;
-        if (area[aux->y+1][aux->x].tipo == Empty){
-            aux->caindo = 1;
-            area[aux->y+1][aux->x].tipo = objeto;
-            area[aux->y][aux->x].tipo = Empty;
+        if (area[aux->y+1][aux->x].tipo == Empty){ // se o espaço de baixo for vazio
+            aux->caindo = 1; // atualiza valor caindo para positivo
+            area[aux->y+1][aux->x].tipo = objeto; // o espaço de baixo vira o objeto em questão, pedra ou diamante
+            area[aux->y][aux->x].tipo = Empty; 
             aux->y++;
         }else if(rola(area, aux, DIREITA)){
             area[aux->y][aux->x+1].tipo = objeto; // caso direita e diagonal inferior direita estejam livres
@@ -109,13 +109,13 @@ int atualiza_objetos(nodo **ini, tile **area, t_sprites sprites, char item){
             area[aux->y][aux->x-1].tipo = objeto; //caso esquerda e diagonal inferior esquerda estejam livres
             area[aux->y][aux->x].tipo = Empty; // pedra desliza para a esquerda
             aux->x--;
-        }else aux->caindo = 0;
+        }else aux->caindo = 0; // se não cair nesses casos, pedra não está caindo
         aux = aux->next;
     }
     return 0;
 }
 
-void destroi_lista(nodo **ini){
+void destroi_lista(nodo **ini){ // destroi uma lista encadeada
     nodo *aux = *ini, *temp = *ini;
     while(aux->next != NULL){
         aux = aux->next;

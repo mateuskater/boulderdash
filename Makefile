@@ -1,11 +1,13 @@
 CFLAGS = -Wall -g
-LDLIBS = $$(pkg-config allegro-5 allegro_font-5 allegro_image-5 --cflags --libs)
+LDLIBS = $$(pkg-config allegro-5 allegro_font-5 allegro_image-5 allegro_audio-5 allegro_acodec-5 --cflags --libs)
 
-OBJS = game.o display.o lista.o init_sprites.o
+OBJS = game.o display.o lista.o init_sprites.o som.o
 
 all: game
 game: $(OBJS)
 
+som.o: som.c som.h
+	gcc -c som.c $(LDLIBS) $(CFLAGS)
 display.o: display.c display.h
 	gcc -c display.c $(LDLIBS) $(CFLAGS)
 lista.o: lista.c lista.h

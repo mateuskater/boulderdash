@@ -3,10 +3,13 @@
 #include <allegro5/allegro5.h>
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_image.h>
+#include <allegro5/allegro_audio.h>
+#include <allegro5/allegro_acodec.h>
 #include "game.h"
 #include "lista.h"
 #include "init_sprites.h"
 #include "display.h"
+#include "som.h"
 
 tile **aloca_area(int lin, int col){
     int i;
@@ -135,13 +138,14 @@ int empurra(tile **area, jogador *player, nodo *pedras, int dir){ //direção se
     return 0; // retorna 0 para sinalizar que não empurrou
 }
 
-void coleta_diamante(tile **area, jogador *player, jogo *jogo, nodo **diamantes){
+void coleta_diamante(tile **area, jogador *player, jogo *jogo, t_sons sons, nodo **diamantes){
     nodo *diamante_coletado;
     diamante_coletado = busca_nodo(*diamantes, player->x, player->y);
     if(diamante_coletado != NULL){
         deleta_nodo(diamantes, diamante_coletado);
         player->score += 10;
         jogo->d_restantes--;
+        al_play_sample(sons.diamante, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
     }
 }
 
@@ -200,8 +204,8 @@ void abre_saida(tile **area, jogo jogo){
     area[jogo.saida_y][jogo.saida_x].tipo = SaidaAberta;
 }
 
-int main(int argc, char *argv[]){
-    int frame_diamante = 0, frame_player = 0, counter = 1, i = 1; //largura, altura, posiçao anterior do player
+int main(){
+    int frame_diamante = 0, frame_player = 0, counter = 1, i = 1;
     jogador player;
     unsigned char key[ALLEGRO_KEY_MAX];
     tile **area;// = aloca_area(DEFAULT_WIDTH,DEFAULT_HEIGHT);
@@ -215,43 +219,37 @@ int main(int argc, char *argv[]){
     int frame_explosao = 0;
     int passou = 0;
 
-    memset(key, 0, sizeof(key));
-    
-    player.score = 0;
-    
     testa_init(al_init(), "allegro");
-    testa_init(al_install_keyboard(), "teclado");
-    testa_init(al_init_image_addon(), "addon de imagem");
-
-    ALLEGRO_TIMER* timer_fps = al_create_timer(1.0 / 60.0);
-    ALLEGRO_TIMER* timer_player = al_create_timer(1.0 / 10.0);
-    ALLEGRO_TIMER* timer_anim = al_create_timer(1.0 / 7.0);
-    ALLEGRO_TIMER* timer_pedras = al_create_timer(1.0 / 5.0);
-    ALLEGRO_TIMER* relogio = al_create_timer(1.0);
-
+    
     ALLEGRO_EVENT_QUEUE* queue = al_create_event_queue();
     testa_init(queue, "queue");
-
+    ALLEGRO_EVENT_QUEUE* qmenu = al_create_event_queue();
+    testa_init(qmenu, "queue do menu");
     ALLEGRO_DISPLAY* disp = inicializa_tela(DEFAULT_WIDTH*2, DEFAULT_HEIGHT*2);
     testa_init(disp, "display");
-
-    setup_transform(disp);
-
     ALLEGRO_FONT* font = al_create_builtin_font();
     testa_init(font, "addon de fonte");
 
+    ALLEGRO_KEYBOARD_STATE ks;
+
+    memset(key, 0, sizeof(key));
+    
+    testa_init(al_install_keyboard(), "teclado");
+    testa_init(al_install_audio(), "audio");
+    testa_init(al_init_acodec_addon(), "codecs de audio");
+    testa_init(al_reserve_samples(16), "reserve samples");
+    testa_init(al_init_image_addon(), "addon de imagem");
+
+    setup_transform(disp);
+
+    t_sons sons = carrega_sons();
     t_sprites sprites = carrega_sprites();
 
     ALLEGRO_BITMAP *gato = al_load_bitmap("./resources/gato.png");
     testa_init(gato, "gatin");
 
-    ALLEGRO_KEYBOARD_STATE ks;
-
-    ALLEGRO_EVENT_QUEUE* qmenu = al_create_event_queue();
-
     al_register_event_source(queue, al_get_keyboard_event_source());
     al_register_event_source(queue, al_get_display_event_source(disp));
-
     al_register_event_source(qmenu, al_get_keyboard_event_source());
     al_register_event_source(qmenu, al_get_display_event_source(disp));
 
@@ -266,6 +264,19 @@ int main(int argc, char *argv[]){
     int flagBreak = 0;
 
     jogo.n_level = 1;
+    player.score = 0;
+
+    ALLEGRO_TIMER* timer_fps = al_create_timer(1.0 / 60.0);
+    ALLEGRO_TIMER* timer_player = al_create_timer(1.0 / 10.0);
+    ALLEGRO_TIMER* timer_anim = al_create_timer(1.0 / 5.0);
+    ALLEGRO_TIMER* timer_pedras = al_create_timer(1.0 / 5.0);
+    ALLEGRO_TIMER* relogio = al_create_timer(1.0);
+
+    al_register_event_source(queue, al_get_timer_event_source(timer_fps));
+    al_register_event_source(queue, al_get_timer_event_source(timer_player)); //registra as sources de evento
+    al_register_event_source(queue, al_get_timer_event_source(timer_anim));
+    al_register_event_source(queue, al_get_timer_event_source(timer_pedras));
+
 
     while(1){ // menu
 
@@ -293,7 +304,7 @@ int main(int argc, char *argv[]){
                 flagBreak = 1;
                 break;
             default :
-                /// Add character to our string
+                
                 break;
             }
         } 
@@ -303,13 +314,8 @@ int main(int argc, char *argv[]){
         }
     }
 
-    al_register_event_source(queue, al_get_timer_event_source(timer_fps));
-    al_register_event_source(queue, al_get_timer_event_source(timer_player));
-    al_register_event_source(queue, al_get_timer_event_source(timer_anim));
-    al_register_event_source(queue, al_get_timer_event_source(timer_pedras));
-
     al_start_timer(timer_fps);
-    al_start_timer(timer_player);
+    al_start_timer(timer_player); //inicia os timers
     al_start_timer(timer_anim);
     al_start_timer(timer_pedras);
 
@@ -359,13 +365,13 @@ int main(int argc, char *argv[]){
                             if(area[player.y-1][player.x].tipo == SaidaAberta)
                                 passou = 1;
                             move_player(area, &player, UP);
-                            coleta_diamante(area, &player, &jogo, &diamantes); 
+                            coleta_diamante(area, &player, &jogo, sons, &diamantes); 
                         }
                         else if((key[ALLEGRO_KEY_DOWN] || key[ALLEGRO_KEY_S]) && !colisao(area, DOWN, player)){
                             if(area[player.y-1][player.x].tipo == SaidaAberta)
                                 passou = 1;
                             move_player(area, &player, DOWN);        
-                            coleta_diamante(area, &player, &jogo, &diamantes);            
+                            coleta_diamante(area, &player, &jogo, sons, &diamantes);            
                         }
                         else if((key[ALLEGRO_KEY_LEFT] || key[ALLEGRO_KEY_A]) && !colisao(area, LEFT, player)){
                             if(area[player.y-1][player.x].tipo == SaidaAberta)
@@ -374,7 +380,7 @@ int main(int argc, char *argv[]){
                                 empurra(area, &player, pedras, ESQUERDA);
                             else
                                 move_player(area, &player, LEFT);
-                            coleta_diamante(area, &player, &jogo, &diamantes); 
+                            coleta_diamante(area, &player, &jogo, sons, &diamantes); 
                         }
                         else if((key[ALLEGRO_KEY_RIGHT] || key[ALLEGRO_KEY_D]) && !colisao(area, RIGHT, player)){
                             if(area[player.y-1][player.x].tipo == SaidaAberta)
@@ -383,7 +389,7 @@ int main(int argc, char *argv[]){
                                 empurra(area, &player, pedras, DIREITA);
                             else
                                 move_player(area, &player, RIGHT);
-                            coleta_diamante(area, &player, &jogo, &diamantes); 
+                            coleta_diamante(area, &player, &jogo, sons, &diamantes); 
                         }else player.dir = STILL;
 
                         if(area[player.y][player.x].tipo == Dirt) //cava
