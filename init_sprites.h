@@ -11,6 +11,8 @@ typedef struct sprites{
         *dirt,
         *rock,
         *exit,
+        *firefly[4],
+        *butterfly[4],
         *prof;
 }t_sprites;
 

@@ -94,8 +94,8 @@ int atualiza_objetos(nodo **ini, tile **area, t_sprites sprites, char item){
         objeto = Rock;
 
     while(aux->next != NULL){
-        // if (area[aux->y+1][aux->x].tipo == Player && aux->caindo == 1)
-            // return 1;
+        if (area[aux->y+1][aux->x].tipo == Player && aux->caindo == 1)
+            return 1; // retorna 1 se mata o player
         if (area[aux->y+1][aux->x].tipo == Empty){ // se o espaço de baixo for vazio
             aux->caindo = 1; // atualiza valor caindo para positivo
             area[aux->y+1][aux->x].tipo = objeto; // o espaço de baixo vira o objeto em questão, pedra ou diamante
@@ -111,6 +111,146 @@ int atualiza_objetos(nodo **ini, tile **area, t_sprites sprites, char item){
             aux->x--;
         }else aux->caindo = 0; // se não cair nesses casos, pedra não está caindo
         aux = aux->next;
+    }
+    return 0;
+}
+
+int atualiza_fireflies(nodo *bichos, tile **area, jogador *player){
+    nodo *aux = bichos;
+
+    while(aux->next != NULL){     
+        switch(aux->dir){
+            case UP:
+                switch(area[aux->y-1][aux->x].tipo){ // checa o espaço de cima
+                    case Empty: // se for vazio, prossegue para aquela direcao
+                        aux->y--;
+                        area[aux->y-1][aux->x].tipo = Enemy;
+                        area[aux->y][aux->x].tipo = Empty;
+                        break;
+                    case Player: // se for player, mata o player
+                        return 1;
+                        break;
+                    default: // se for qualquer outra coisa, troca de direcao
+                        aux->dir = LEFT;
+                        break;
+                }
+            break;
+            case LEFT:
+                switch(area[aux->y][aux->x-1].tipo){ //checa o espaço da esquerda
+                    case Empty:
+                        aux->x--;
+                        area[aux->y][aux->x-1].tipo = Enemy;
+                        area[aux->y][aux->x].tipo = Empty;
+                        break;
+                    case Player:
+                        return 1;
+                        break;
+                    default:
+                        aux->dir = DOWN;
+                        break;
+                }
+            break;
+            case DOWN:
+                switch(area[aux->y+1][aux->x].tipo){ // checa o espaço de baixo
+                    case Empty:
+                        aux->y++;
+                        area[aux->y+1][aux->x].tipo = Enemy;
+                        area[aux->y][aux->x].tipo = Empty;
+                        break;
+                    case Player:
+                        return 1;
+                        break;
+                    default:
+                        aux->dir = RIGHT;
+                        break;
+                }
+            break;
+            case RIGHT:
+                switch(area[aux->y][aux->x+1].tipo){ // checa o espaço da direita
+                    case Empty:
+                        aux->x++;
+                        area[aux->y][aux->x+1].tipo = Enemy;
+                        area[aux->y][aux->x].tipo = Empty;
+                        break;
+                    case Player:
+                        return 1;
+                        break;
+                    default:
+                        aux->dir = UP;
+                        break;
+                }
+            break;   
+        }
+    }
+    return 0;
+}
+
+int atualiza_butterflies(nodo *bichos, tile **area, jogador *player){
+    nodo *aux = bichos;
+
+    while(aux->next != NULL){     
+        switch(aux->dir){
+            case UP:
+                switch(area[aux->y-1][aux->x].tipo){ // checa o espaço de cima
+                    case Empty: // se for vazio, prossegue para aquela direcao
+                        aux->y--;
+                        area[aux->y-1][aux->x].tipo = Enemy;
+                        area[aux->y][aux->x].tipo = Empty;
+                        break;
+                    case Player: // se for player, mata o player
+                        return 1;
+                        break;
+                    default: // se for qualquer outra coisa, troca de direcao
+                        aux->dir = LEFT;
+                        break;
+                }
+            break;
+            case LEFT:
+                switch(area[aux->y][aux->x-1].tipo){ //checa o espaço da esquerda
+                    case Empty:
+                        aux->x--;
+                        area[aux->y][aux->x-1].tipo = Enemy;
+                        area[aux->y][aux->x].tipo = Empty;
+                        break;
+                    case Player:
+                        return 1;
+                        break;
+                    default:
+                        aux->dir = DOWN;
+                        break;
+                }
+            break;
+            case DOWN:
+                switch(area[aux->y+1][aux->x].tipo){ // checa o espaço de baixo
+                    case Empty:
+                        aux->y++;
+                        area[aux->y+1][aux->x].tipo = Enemy;
+                        area[aux->y][aux->x].tipo = Empty;
+                        break;
+                    case Player:
+                        return 1;
+                        break;
+                    default:
+                        aux->dir = RIGHT;
+                        break;
+                }
+            break;
+            case RIGHT:
+                switch(area[aux->y][aux->x+1].tipo){ // checa o espaço da direita
+                    case Empty:
+                        aux->x++;
+                        area[aux->y][aux->x+1].tipo = Enemy;
+                        area[aux->y][aux->x].tipo = Empty;
+                        break;
+                    case Player:
+                        return 1;
+                        break;
+                    default:
+                        aux->dir = UP;
+                        break;
+                }
+            break;   
+        }
     }
     return 0;
 }
