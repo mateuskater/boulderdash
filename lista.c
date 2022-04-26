@@ -63,12 +63,13 @@ int conta_nodos(nodo *ini){ // retorna a quantidade de nodos na lista
 void desenha_pedras(nodo *ini, t_sprites sprites){ // desenha todas as pedras da lista encadeada na tela
     nodo *aux = ini;
     while(aux != NULL){
-        al_draw_bitmap(sprites.rock, aux->x*16, aux->y*16 + OFF, 0);
+        al_draw_scaled_bitmap(sprites.rock, 0, 0, 166, 240, aux->x*16, aux->y*16 + OFF, 16, 16, 0);
+        // al_draw_bitmap(sprites.rock, aux->x*16, aux->y*16 + OFF, 0);
         aux = aux->next;
     }
 }
 
-void desenha_diamantes(nodo *ini, t_sprites sprites, int frame){ // desenha todos os diamantes da lista encadeada na tela
+void desenha_objetos(nodo *ini, t_sprites sprites, int frame){ // desenha todos os diamantes da lista encadeada na tela
     nodo *aux = ini;
     while(aux != NULL){
         al_draw_bitmap(sprites.diamond[frame], aux->x*16, aux->y*16 + OFF, 0);
@@ -115,8 +116,8 @@ int atualiza_objetos(nodo **ini, tile **area, t_sprites sprites, char item){
     return 0;
 }
 
-int atualiza_fireflies(nodo *bichos, tile **area, jogador *player){
-    nodo *aux = bichos;
+int atualiza_fireflies(nodo **bichos, tile **area, jogador *player){
+    nodo *aux = *bichos;
 
     while(aux->next != NULL){     
         switch(aux->dir){
@@ -185,8 +186,8 @@ int atualiza_fireflies(nodo *bichos, tile **area, jogador *player){
     return 0;
 }
 
-int atualiza_butterflies(nodo *bichos, tile **area, jogador *player){
-    nodo *aux = bichos;
+int atualiza_butterflies(nodo **bichos, tile **area, jogador *player){
+    nodo *aux = *bichos;
 
     while(aux->next != NULL){     
         switch(aux->dir){
@@ -257,6 +258,7 @@ int atualiza_butterflies(nodo *bichos, tile **area, jogador *player){
 
 void destroi_lista(nodo **ini){ // destroi uma lista encadeada
     nodo *aux = *ini, *temp = *ini;
+    
     while(aux->next != NULL){
         aux = aux->next;
         free(temp);

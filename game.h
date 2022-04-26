@@ -1,7 +1,8 @@
-#ifndef BDASH_H
-#define BDASH_H
+#ifndef GAME_H
+#define GAME_H
 
 #include "init_sprites.h"
+#include "som.h"
 
 #define KEY_SEEN 1
 #define KEY_RELEASED 2
@@ -43,11 +44,11 @@ typedef struct jogo{
 }jogo;
 
 tile **aloca_area(int lin, int col);
-void inicializa_jogo(tile **area, jogador *player, nodo **pedras, nodo **diamantes, jogo *jogo);
+void inicializa_jogo(tile **area, jogador *player, nodo **pedras, nodo **diamantes, nodo **butterflies, nodo **fireflies, jogo *jogo);
 int colisao(tile **area, int direcao, jogador player);
 void move_player(tile **area, jogador *player, int dir);
 int empurra(tile **area, jogador *player, nodo *pedras, int dir);
-void coleta_diamante(tile **area, jogador *player, jogo *jogo, nodo **diamantes);
+void coleta_diamante(tile **area, jogador *player, jogo *jogo, t_sons sons, nodo **diamantes);
 void desenha_mapa(tile **area, t_sprites sprites);
 void testa_init(bool test, const char *objeto);
 int morte(jogador player, t_sprites sprites, int frame);

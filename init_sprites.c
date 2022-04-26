@@ -4,7 +4,7 @@
 #include "init_sprites.h"
 
 t_sprites carrega_sprites(void){
-    int i, j;
+    int i;
     t_sprites sprites;
     ALLEGRO_BITMAP* sheet = al_load_bitmap("./resources/spritesheet.png");
     

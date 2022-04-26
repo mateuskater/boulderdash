@@ -20,14 +20,14 @@ tile **aloca_area(int lin, int col){
     return area;
 }
 
-void inicializa_jogo(tile **area, jogador *player, nodo **pedras, nodo **diamantes, jogo *jogo){
+void inicializa_jogo(tile **area, jogador *player, nodo **pedras, nodo **diamantes, nodo **butterflies, nodo **fireflies, jogo *jogo){
     int i, j;
     char aux;
     char buf[128];
 
     snprintf(buf, sizeof(buf), "./resources/level%d.txt", jogo->n_level);
     ALLEGRO_FILE *level = al_fopen(buf, "r");
-    nodo *nova_pedra, *novo_diam;
+    nodo *novo_item;
 
     for(i = 0; i < LIN; i++)
         for(j = 0; j < COL; j++){
@@ -42,13 +42,13 @@ void inicializa_jogo(tile **area, jogador *player, nodo **pedras, nodo **diamant
                         break;
                     case 'd':
                         area[i][j].tipo = Diamond;
-                        novo_diam = cria_nodo(0, j, i);
-                        *diamantes = insere_nodo(diamantes, novo_diam);
+                        novo_item = cria_nodo(0, j, i);
+                        *diamantes = insere_nodo(diamantes, novo_item);
                         break;
                     case 'r':
                         area[i][j].tipo = Rock;
-                        nova_pedra = cria_nodo(0, j, i);
-                        *pedras = insere_nodo(pedras, nova_pedra);
+                        novo_item = cria_nodo(0, j, i);
+                        *pedras = insere_nodo(pedras, novo_item);
                         break;
                     case '.':
                         area[i][j].tipo = Dirt;
@@ -65,6 +65,18 @@ void inicializa_jogo(tile **area, jogador *player, nodo **pedras, nodo **diamant
                         break;
                     case ' ':
                         area[i][j].tipo = Empty;
+                        break;
+                    case 'B':
+                        area[i][j].tipo = Enemy;
+                        novo_item = cria_nodo(0, j, i);
+                        novo_item->dir = UP;
+                        *butterflies = insere_nodo(butterflies, novo_item);
+                        break;
+                    case 'q':
+                        area[i][j].tipo = Enemy;
+                        novo_item = cria_nodo(0, j, i);
+                        novo_item->dir = UP;
+                        *fireflies = insere_nodo(fireflies, novo_item);
                         break;
                     default:
                         break;
@@ -137,14 +149,14 @@ int empurra(tile **area, jogador *player, nodo *pedras, int dir){ //direção se
     return 0; // retorna 0 para sinalizar que não empurrou
 }
 
-void coleta_diamante(tile **area, jogador *player, jogo *jogo, nodo **diamantes){
+void coleta_diamante(tile **area, jogador *player, jogo *jogo, t_sons sons, nodo **diamantes){
     nodo *diamante_coletado;
     diamante_coletado = busca_nodo(*diamantes, player->x, player->y);
     if(diamante_coletado != NULL){
         deleta_nodo(diamantes, diamante_coletado);
         player->score += 10;
         jogo->d_restantes--;
-        // al_play_sample(sons.diamante, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
+        al_play_sample(sons.diamante, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
     }
 }
 
@@ -154,19 +166,11 @@ void desenha_mapa(tile **area, t_sprites sprites){
     for(i = 0; i < LIN; i++)
         for(j = 0; j < COL; j++){
             switch(area[i][j].tipo){
-                case Empty:
-                    break;
                 case Wall:
                     al_draw_bitmap(sprites.wall, j*16, i*16 + OFF, 0);
                     break;
                 case Dirt:
                     al_draw_bitmap(sprites.dirt, j*16, i*16 + OFF, 0);
-                    break;
-                case Player:
-                    break;
-                case Rock:
-                    break;
-                case SaidaFechada:
                     break;
                 case SaidaAberta:
                     al_draw_bitmap(sprites.exit, j*16, i*16 + OFF, 0);
@@ -174,7 +178,7 @@ void desenha_mapa(tile **area, t_sprites sprites){
                 case Brick:
                     al_draw_bitmap(sprites.brick, j*16, i*16 + OFF, 0);
                     break;
-                case Diamond:
+                default:
                     break;
             }
         }
