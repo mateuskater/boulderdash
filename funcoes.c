@@ -43,12 +43,12 @@ void inicializa_jogo(tile **area, jogador *player, nodo **pedras, nodo **diamant
                     case 'd':
                         area[i][j].tipo = Diamond;
                         novo_item = cria_nodo(0, j, i);
-                        *diamantes = insere_nodo(diamantes, novo_item);
+                        insere_nodo(diamantes, novo_item);
                         break;
                     case 'r':
                         area[i][j].tipo = Rock;
                         novo_item = cria_nodo(0, j, i);
-                        *pedras = insere_nodo(pedras, novo_item);
+                        insere_nodo(pedras, novo_item);
                         break;
                     case '.':
                         area[i][j].tipo = Dirt;
@@ -156,7 +156,7 @@ void coleta_diamante(tile **area, jogador *player, jogo *jogo, t_sons sons, nodo
         deleta_nodo(diamantes, diamante_coletado);
         player->score += 10;
         jogo->d_restantes--;
-        al_play_sample(sons.diamante, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
+        // al_play_sample(sons.diamante, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
     }
 }
 
@@ -190,11 +190,13 @@ void testa_init(bool test, const char *objeto){
     exit(1);
 }
 
-int morte(jogador player, t_sprites sprites, int frame){
+int morte(tile **area, jogador player, t_sprites sprites, int frame){
     int i,j;
     for (i = -1; i <= 1; i++)
-        for(j = -1; j <= 1; j++)
+        for(j = -1; j <= 1; j++){
             al_draw_bitmap(sprites.morte[frame], player.x+j,player.y+i + OFF, 0);
+            area[player.y+i][player.x+j].tipo = Empty;
+        }
     return 0;
 }
 

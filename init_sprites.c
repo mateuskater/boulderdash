@@ -43,15 +43,8 @@ t_sprites carrega_sprites(void){
         sprites.firefly[i] = al_create_sub_bitmap(sheet, 80, 64+(i*16), 16, 16); 
         sprites.butterfly[i] = al_create_sub_bitmap(sheet, 96, 64+(i*16), 16, 16);
     }
-    
-    sprites.prof = al_load_bitmap("./resources/menotti.png");
 
-    for(i = 0; i < 7; i++){
-        al_convert_mask_to_alpha(sprites.player[i], al_map_rgb(18, 23, 18));
-        al_convert_mask_to_alpha(sprites.player_left[i], al_map_rgb(18, 23, 18));
-        al_convert_mask_to_alpha(sprites.player_right[i], al_map_rgb(18, 23, 18));
-    }
-    al_convert_mask_to_alpha(sprites.rock, al_map_rgb(18, 23, 18));
+    sprites.prof = al_load_bitmap("./resources/David-Menotti.png");
 
     return sprites;
 }
