@@ -21,17 +21,19 @@ tile **aloca_area(int lin, int col){
 }
 
 void inicializa_jogo(tile **area, jogador *player, nodo **pedras, nodo **diamantes, nodo **butterflies, nodo **fireflies, jogo *jogo){
+    // inicializa a área de jogo. lê um arquivo de texto contendo instruções
+    // de como desenhar o mapa, e armazena tudo em uma matriz de "tile"
     int i, j;
     char aux;
     char buf[128];
 
     snprintf(buf, sizeof(buf), "./resources/level%d.txt", jogo->n_level);
     ALLEGRO_FILE *level = al_fopen(buf, "r");
-    nodo *novo_item;
+    nodo *novo_item; // variavel tipo nodo para armazenar um item criado
 
     for(i = 0; i < LIN; i++)
         for(j = 0; j < COL; j++){
-            al_fread(level, &aux, 1);
+            al_fread(level, &aux, 1); // fread para ler do arquivo txt
             if (aux != '\n'){
                 switch(aux){
                     case 'W':
@@ -109,13 +111,14 @@ int colisao(tile **area, int direcao, jogador player){
 }
 
 void move_player(tile **area, jogador *player, int dir){
+    // funcao para mover o player
     switch(dir){
-        case UP:
-            area[player->y-1][player->x].tipo = Player;
+        case UP: // caso a direcao seja pra cima, define o espaco de cima
+            area[player->y-1][player->x].tipo = Player; // como player, e o atual como vazio
             area[player->y][player->x].tipo = Empty;
             player->y--;
             break;
-        case DOWN:
+        case DOWN: // faz o mesmo para outras direcoes
             area[player->y+1][player->x].tipo = Player;
             area[player->y][player->x].tipo = Empty;
             player->y++;
@@ -190,12 +193,12 @@ void testa_init(bool test, const char *objeto){
     exit(1);
 }
 
-int morte(tile **area, jogador player, t_sprites sprites, int frame){
+int explode(tile **area, t_sprites sprites, int x, int y, int frame){
     int i,j;
     for (i = -1; i <= 1; i++)
         for(j = -1; j <= 1; j++){
-            al_draw_bitmap(sprites.morte[frame], player.x+j,player.y+i + OFF, 0);
-            area[player.y+i][player.x+j].tipo = Empty;
+            al_draw_bitmap(sprites.explosao[frame], x+j,y+i + OFF, 0);
+            area[y+i][x+j].tipo = Empty;
         }
     return 0;
 }

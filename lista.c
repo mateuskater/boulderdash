@@ -28,6 +28,8 @@ nodo *insere_nodo(nodo **ini, nodo *input){ // insere na lista um nodo passado
 
 nodo *busca_nodo(nodo *ini, int x, int y){ // busca um nodo pelas coordenadas e o retorna
     nodo *aux = ini;
+    if (ini == NULL)
+        return NULL; 
     while( (aux->x != x || aux->y != y) && aux->next != NULL)
         aux = aux->next;
     if(aux->x == x && aux->y == y)
@@ -46,7 +48,7 @@ int deleta_nodo(nodo **ini, nodo *select){ // deleta um nodo fornecido como para
     }
     while(aux->next != select){
         aux = aux->next;
-        if(aux == NULL)
+        if(aux->next == NULL)
             return 1;
     }
     temp = aux->next;
@@ -137,10 +139,10 @@ int atualiza_objetos(nodo **ini, tile **area, t_sprites sprites, char item){
     return 0;
 }
 
-int atualiza_fireflies(nodo **bichos, tile **area, jogador *player){
-    nodo *aux = *bichos;
+int atualiza_fireflies(nodo **bichos, tile **area, t_sprites sprites, jogador *player){
+    nodo *aux = *bichos, *temp;
 
-    while(aux->next != NULL){     
+    while(aux->next != NULL){  
         if(aux->dir == UP)      
             switch(area[aux->y-1][aux->x].tipo){ // checa o espaço de cima
                 case Empty: // se for vazio, prossegue para aquela direcao
@@ -200,13 +202,18 @@ int atualiza_fireflies(nodo **bichos, tile **area, jogador *player){
                     aux->dir = UP;
                     break;
             }
+        temp = aux;
+        if(area[aux->y-1][aux->x].tipo == Rock){
+            explode(area, sprites, aux->x, aux->y, 0);
+            deleta_nodo(bichos, temp);
+        }
         aux = aux->next;
     }
     return 0;
 }
 
-int atualiza_butterflies(nodo **bichos, tile **area, jogador *player){
-    nodo *aux = *bichos;
+int atualiza_butterflies(nodo **bichos, tile **area, t_sprites sprites, jogador *player){
+    nodo *aux = *bichos, *temp;
 
     while(aux->next != NULL){     
         if(aux->dir == UP)
@@ -265,6 +272,11 @@ int atualiza_butterflies(nodo **bichos, tile **area, jogador *player){
                     aux->dir = UP;
                     break;
             } 
+        temp = aux;
+        if(area[aux->y-1][aux->x].tipo == Rock){
+            explode(area, sprites, aux->x, aux->y, 0);
+            deleta_nodo(bichos, temp);
+        }
         aux = aux->next;
     }
     return 0;

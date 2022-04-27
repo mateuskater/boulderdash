@@ -28,11 +28,11 @@ t_sprites carrega_sprites(void){
     sprites.diamond[6] = al_create_sub_bitmap(sheet, 16, 96, 16, 16);
     sprites.diamond[7] = al_create_sub_bitmap(sheet, 16, 112, 16, 16);
     
-    sprites.morte[0] = al_create_sub_bitmap(sheet, 112, 64, 16, 16);
-    sprites.morte[1] = al_create_sub_bitmap(sheet, 112, 80, 16, 16);
-    sprites.morte[2] = al_create_sub_bitmap(sheet, 112, 96, 16, 16);
-    sprites.morte[3] = al_create_sub_bitmap(sheet, 112, 80, 16, 16);
-    sprites.morte[4] = al_create_sub_bitmap(sheet, 112, 64, 16, 16);
+    sprites.explosao[0] = al_create_sub_bitmap(sheet, 112, 64, 16, 16);
+    sprites.explosao[1] = al_create_sub_bitmap(sheet, 112, 80, 16, 16);
+    sprites.explosao[2] = al_create_sub_bitmap(sheet, 112, 96, 16, 16);
+    sprites.explosao[3] = al_create_sub_bitmap(sheet, 112, 80, 16, 16);
+    sprites.explosao[4] = al_create_sub_bitmap(sheet, 112, 64, 16, 16);
 
     sprites.dirt = al_create_sub_bitmap(sheet, 48, 48, 16, 16);
     sprites.rock = al_create_sub_bitmap(sheet, 80, 48, 16, 16);

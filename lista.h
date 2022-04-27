@@ -10,13 +10,13 @@ nodo *busca_nodo(nodo *ini, int x, int y);
 int deleta_nodo(nodo **ini, nodo *select);
 int conta_nodos(nodo *ini);
 void desenha_pedras(nodo *ini, t_sprites sprites);
-void desenha_objetos(nodo *ini, t_sprites sprites, int frame);
+void desenha_diamantes(nodo *ini, t_sprites sprites, int frame);
 void desenha_fireflies(nodo *ini, t_sprites sprites, int frame);
 void desenha_butterflies(nodo *ini, t_sprites sprites, int frame);
 int rola(tile **area, nodo *atual, int dir);
 int atualiza_objetos(nodo **ini, tile **area, t_sprites sprites, char item);
-int atualiza_fireflies(nodo **bichos, tile **area, jogador *player);
-int atualiza_butterflies(nodo **bichos, tile **area, jogador *player);
+int atualiza_fireflies(nodo **bichos, tile **area, t_sprites sprites, jogador *player);
+int atualiza_butterflies(nodo **bichos, tile **area, t_sprites sprites, jogador *player);
 void destroi_lista(nodo **ini);
 
 #endif

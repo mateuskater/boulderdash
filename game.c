@@ -15,16 +15,16 @@ int main(){
     int frame_diamante = 0, frame_player = 0, frame_inimigos = 0, frame_explosao = 0, counter = 1, i = 1;
     jogador player;
     unsigned char key[ALLEGRO_KEY_MAX];
-    tile **area;// = aloca_area(DEFAULT_WIDTH,DEFAULT_HEIGHT);
+    tile **area;
     nodo *pedras = NULL;
     nodo *diamantes = NULL;
     nodo *butterflies = NULL;
     nodo *fireflies = NULL;
     nodo *diamante_coletado = NULL;
     jogo jogo = {0, 0, 0};
-    int passou = 0; // variaveis para controlar se o personagem morreu ou passou de fase
+    int passou = 0; // variavel para controlar se o personagem passou de fase
 
-    testa_init(al_init(), "allegro");
+    testa_init(al_init(), "allegro"); // inicializa a engine do allegro
     
     ALLEGRO_EVENT_QUEUE* queue = al_create_event_queue();
     testa_init(queue, "queue");
@@ -38,17 +38,16 @@ int main(){
     memset(key, 0, sizeof(key));
     
     testa_init(al_install_keyboard(), "teclado");
+    testa_init(al_install_mouse(), "mouse");
 
     //testa_init(al_install_audio(), "audio");
     //testa_init(al_init_acodec_addon(), "codecs de audio");
     //testa_init(al_reserve_samples(16), "reserve samples");
     t_sons sons = carrega_sons();
-
     testa_init(al_init_image_addon(), "addon de imagem");
+    t_sprites sprites = carrega_sprites();
 
     setup_transform(disp);
-
-    t_sprites sprites = carrega_sprites();
 
     ALLEGRO_BITMAP *logo = al_load_bitmap("./resources/bdlogo.png");
     testa_init(logo, "logo");
@@ -58,16 +57,12 @@ int main(){
     al_register_event_source(qmenu, al_get_keyboard_event_source());
     al_register_event_source(qmenu, al_get_display_event_source(disp));
 
-    int tela_jogo = 1;
-    int tela_ajuda = 0;
+    int tela_jogo = 1; // para sinalizar se deve desenhar tela do jogo
+    int tela_ajuda = 0; // para sinalizar se deve desenhar a tela de ajuda
+    int flagBreak = 0; // uma flag para sair do while se estiver dentro de um switch
     ALLEGRO_EVENT event;
-
-    // int alturaLogo = al_get_bitmap_height(logo);
-    // int larguraLogo = al_get_bitmap_width(logo);
-
-    al_clear_to_color(al_map_rgb(0, 0, 0));
     
-    int flagBreak = 0;
+    
 
     jogo.n_level = 1;
     player.score = 0;
@@ -83,7 +78,7 @@ int main(){
     al_register_event_source(queue, al_get_timer_event_source(timer_anim));
     al_register_event_source(queue, al_get_timer_event_source(timer_pedras));
 
-    while(1){ // menu
+    while(1){ // loop do menu
 
         al_draw_text(font, aqua, DEFAULT_WIDTH/2, 10, ALLEGRO_ALIGN_CENTRE, "boder dash");
         al_draw_bitmap(logo, DEFAULT_WIDTH/5, 0, 0);
@@ -108,7 +103,6 @@ int main(){
                 flagBreak = 1;
                 break;
             default :
-                
                 break;
             }
         }else if(event.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
@@ -147,18 +141,19 @@ int main(){
                         frame_player = counter % 7;
                         frame_diamante = counter % 8;
                         frame_inimigos = counter % 4;
+                        frame_explosao = counter % 5;
                         counter++;
                     }
 
                     if(event.timer.source == timer_pedras){
                         if(atualiza_objetos(&pedras, area, sprites, 'r')) // aqui é usado um método binário de verificação.
-                            player.vivo = morte(area, player, sprites, 0); // se alguma dessas funções retorna 1, o player morreu
+                            player.vivo = explode(area, sprites, player.x, player.y, 0); // se alguma dessas funções retorna 1, o player morreu
                         if(atualiza_objetos(&diamantes, area, sprites, 'd'))
-                            player.vivo = morte(area, player, sprites, 0);
-                        if(atualiza_fireflies(&fireflies, area, &player))
-                            player.vivo = morte(area, player, sprites, 0);
-                        if(atualiza_butterflies(&butterflies, area, &player))
-                            player.vivo = morte(area, player, sprites, 0);
+                            player.vivo = explode(area, sprites, player.x, player.y, 0);
+                        if(atualiza_fireflies(&fireflies, area, sprites, &player))
+                            player.vivo = explode(area, sprites, player.x, player.y, 0);
+                        if(atualiza_butterflies(&butterflies, area, sprites, &player))
+                            player.vivo = explode(area, sprites, player.x, player.y, 0);
                     }
 
                     if(event.timer.source == timer_player){
@@ -253,9 +248,14 @@ int main(){
                 case ALLEGRO_EVENT_DISPLAY_CLOSE:
                     exit(0);
             }
-            if(tela_ajuda){
-                al_clear_to_color(branco);
+            while(tela_ajuda){
+                al_stop_timer(relogio);
+                al_stop_timer(timer_anim);
+                al_stop_timer(timer_player);
+                al_stop_timer(timer_pedras);
+                al_clear_to_color(preto);
                 al_draw_text(font, branco, DEFAULT_WIDTH/2, 5, ALLEGRO_ALIGN_CENTER, "Ajuda");
+
 
             }
             if(tela_jogo && al_is_event_queue_empty(queue) && event.timer.source == timer_fps){
@@ -287,6 +287,7 @@ int main(){
         }
 
         al_stop_timer(relogio);
+        al_set_timer_count(relogio, 0);
         // al_stop_sample(music_id);
         if(passou)
             jogo.n_level++;
@@ -294,7 +295,7 @@ int main(){
             for(i = 0; i < 5; i++){
                 al_wait_for_event(queue, &event);
                 if(event.type == ALLEGRO_EVENT_TIMER && event.timer.source == timer_anim)
-                    morte(area, player, sprites, frame_explosao);
+                    explode(area, sprites, player.x, player.y, frame_explosao);
                 frame_explosao = counter % 5;
             }
 
@@ -308,14 +309,14 @@ int main(){
         passou = 0;
     }
 
+    free(area[0]);
+    free(area);
     al_destroy_font(font);
     al_destroy_display(disp);
     al_destroy_timer(timer_fps);
     al_destroy_timer(timer_player);
     al_destroy_timer(timer_anim);
     al_destroy_event_queue(queue);
-    free(area[0]);
-    free(area);
     destroi_lista(&pedras);
     destroi_lista(&diamantes);
     destroi_lista(&butterflies);

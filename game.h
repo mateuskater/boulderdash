@@ -51,7 +51,7 @@ int empurra(tile **area, jogador *player, nodo *pedras, int dir);
 void coleta_diamante(tile **area, jogador *player, jogo *jogo, t_sons sons, nodo **diamantes);
 void desenha_mapa(tile **area, t_sprites sprites);
 void testa_init(bool test, const char *objeto);
-int morte(tile **area, jogador player, t_sprites sprites, int frame);
+int explode(tile **area, t_sprites sprites, int x, int y, int frame);
 void abre_saida(tile **area, jogo jogo);
 
 #endif

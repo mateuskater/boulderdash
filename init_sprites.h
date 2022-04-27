@@ -20,7 +20,7 @@ typedef struct sprites{
         *wall,
         *brick,
         *diamond[8],
-        *morte[5],
+        *explosao[5],
         *dirt,
         *rock,
         *exit,
