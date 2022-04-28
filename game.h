@@ -11,14 +11,14 @@
 #define KEY_SEEN 1
 #define KEY_RELEASED 2
 
-#define LIN 23 // dimensões da área de jogo
+#define LIN 23
 #define COL 40
 
 #define STILL 0
-#define UP 2
-#define RIGHT 1
+#define UP 1
+#define RIGHT 2
 #define DOWN 3
-#define LEFT -1
+#define LEFT 4
 
 #define TEMPO_LIMITE 150
 #define OFF 16 // offset para dar espaço ao HUD

@@ -22,7 +22,7 @@ int main(){
     nodo *butterflies = NULL;
     nodo *fireflies = NULL;
     nodo *diamante_coletado = NULL;
-    jogo jogo = {0, 0, 0};
+    jogo jogo = {0};
     int n_tela = 0; // para a tela de ajuda
     int passou = 0; // variavel para controlar se o personagem passou de fase
 
@@ -38,8 +38,8 @@ int main(){
     testa_init(disp, "display");
     ALLEGRO_FONT* font = al_create_builtin_font();
     testa_init(font, "addon de fonte");
-    ALLEGRO_FONT* pixeboy = al_load_ttf_font("./resources/pixeboy.ttf", 16, 0);
-    testa_init(pixeboy, "fonte bolada");
+    // ALLEGRO_FONT* pixeboy = al_load_ttf_font("./resources/pixeboy.ttf", 12, 0);
+    // esta_init(pixeboy, "fonte bolada");
     memset(key, 0, sizeof(key));
     
     testa_init(al_install_keyboard(), "teclado");
@@ -77,6 +77,8 @@ int main(){
     jogo.reset = 0;
     jogo.n_level = 1;
     player.score = 0;
+    player.vivo = 1;
+
 
     ALLEGRO_TIMER* timer_fps = al_create_timer(1.0 / 60.0);
     ALLEGRO_TIMER* timer_player = al_create_timer(1.0 / 10.0);
@@ -129,6 +131,8 @@ int main(){
 
     player.vidas = 3;
 
+    int hmm = 0;
+
     while(1){ // game loop
         
         area = aloca_area(DEFAULT_WIDTH,DEFAULT_HEIGHT);
@@ -140,6 +144,7 @@ int main(){
         jogo.n_diams = conta_nodos(diamantes);
         jogo.d_restantes = jogo.n_diams;
         al_start_timer(relogio);
+        hmm++;
         // al_play_sample(sons.musica, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_LOOP, NULL);
 
         while(player.vivo && !passou && !jogo.reset){ // game loop
@@ -226,7 +231,7 @@ int main(){
                         abre_saida(area, jogo);
                     if (jogo.t_restante == 0){
                         player.vivo = 0;
-                        al_draw_text(pixeboy, vermelho, DEFAULT_WIDTH/2, DEFAULT_HEIGHT/2, ALLEGRO_ALIGN_CENTER, "O TEMPO ACABOU!");
+                        // al_draw_text(pixeboy, vermelho, DEFAULT_WIDTH/2, DEFAULT_HEIGHT/2, ALLEGRO_ALIGN_CENTER, "O TEMPO ACABOU!");
                         al_rest(3.0);
                     }
                     for(int i = 0; i < ALLEGRO_KEY_MAX; i++)
@@ -350,13 +355,14 @@ int main(){
         destroi_lista(&butterflies);
         destroi_lista(&fireflies);
         player.vivo = 1;
+        jogo.reset = 0;
         passou = 0;
     }
 
     free(area[0]);
     free(area);
     al_destroy_font(font);
-    al_destroy_font(pixeboy);
+    // al_destroy_font(pixeboy);
     al_destroy_display(disp);
     al_destroy_timer(timer_fps);
     al_destroy_timer(timer_player);

@@ -26,10 +26,10 @@ void inicializa_jogo(tile **area, jogador *player, nodo **pedras, nodo **diamant
     int i, j;
     char aux;
     char buf[128];
+    nodo *novo_item; // variavel tipo nodo para armazenar um item criado
 
     snprintf(buf, sizeof(buf), "./resources/level%d.txt", jogo->n_level);
     ALLEGRO_FILE *level = al_fopen(buf, "r");
-    nodo *novo_item; // variavel tipo nodo para armazenar um item criado
     if(!level) // se fopen for mal sucedido
         exit(1);
 
