@@ -3,6 +3,7 @@
 
 #define branco al_map_rgb(255,255,255)
 #define preto al_map_rgb(0,0,0)
+#define vermelho al_map_rgb(255,0,0)
 #define bordo al_map_rgb(147,56,76)
 #define aqua al_map_rgb(185,250,250)
 #define rosa al_map_rgb(210,129,235)

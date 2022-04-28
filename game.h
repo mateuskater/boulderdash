@@ -11,31 +11,28 @@
 #define KEY_SEEN 1
 #define KEY_RELEASED 2
 
-#define LIN 23
+#define LIN 23 // dimensões da área de jogo
 #define COL 40
 
 #define STILL 0
-#define UP 1
-#define RIGHT 2
+#define UP 2
+#define RIGHT 1
 #define DOWN 3
-#define LEFT 4
-
-#define ESQUERDA -1
-#define DIREITA 1
+#define LEFT -1
 
 #define TEMPO_LIMITE 150
 #define OFF 16 // offset para dar espaço ao HUD
 
-typedef struct nodo{
+typedef struct nodo{ // implementação de lista encadeada
     int caindo, x, y; //att = se precisa atualizar ou não
     int dir; // direcao, para os inimigos
-    struct nodo *next;
+    struct nodo *next; // ponteiro para o proximo nodo da lista
 }nodo;
 
 typedef struct jogador{
-    int x, y;
-    int score, dir;
-    int vivo;
+    int x, y; // coordenadas do jogador
+    int score, dir; // pontuação e direção que ele está indo
+    int vivo, vidas; //se ele está vivo ou quantidade de vidas
 }jogador;
 
 typedef struct tile{
@@ -44,7 +41,8 @@ typedef struct tile{
 
 typedef struct jogo{
     int n_level, d_restantes, n_diams, t_restante;
-    int saida_x, saida_y; 
+    int saida_x, saida_y; // coordenadas da saida do level
+    int reset; //variavel para sair do loop, reiniciar o level ou trocar de level
 }jogo;
 
 tile **aloca_area(int lin, int col);

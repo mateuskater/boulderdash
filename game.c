@@ -5,6 +5,7 @@
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_audio.h>
 #include <allegro5/allegro_acodec.h>
+#include <allegro5/allegro_ttf.h>
 #include "game.h"
 #include "lista.h"
 #include "init_sprites.h"
@@ -37,6 +38,8 @@ int main(){
     testa_init(disp, "display");
     ALLEGRO_FONT* font = al_create_builtin_font();
     testa_init(font, "addon de fonte");
+    ALLEGRO_FONT* pixeboy = al_load_ttf_font("./resources/pixeboy.ttf", 16, 0);
+    testa_init(pixeboy, "fonte bolada");
     memset(key, 0, sizeof(key));
     
     testa_init(al_install_keyboard(), "teclado");
@@ -57,17 +60,21 @@ int main(){
     ALLEGRO_BITMAP **help = calloc(3, sizeof(ALLEGRO_BITMAP*));
     gera_tela_help(help);
 
+    ALLEGRO_BITMAP *heart = al_load_bitmap("./resources/heart.png");
+    testa_init(heart, "heart");
+
     al_register_event_source(queue, al_get_keyboard_event_source());
     al_register_event_source(queue, al_get_display_event_source(disp));
     al_register_event_source(qmenu, al_get_keyboard_event_source());
     al_register_event_source(qmenu, al_get_display_event_source(disp));
+    al_register_event_source(queue, al_get_mouse_event_source());
 
-    // int redesenhar = 1;
     int tela_jogo = 1; // para sinalizar se deve desenhar tela do jogo
     int tela_help = 0; // para sinalizar se deve desenhar a tela de help
     int flagBreak = 0; // uma flag para sair do while se estiver dentro de um switch
     ALLEGRO_EVENT event;
 
+    jogo.reset = 0;
     jogo.n_level = 1;
     player.score = 0;
 
@@ -83,9 +90,7 @@ int main(){
     al_register_event_source(queue, al_get_timer_event_source(timer_pedras));
 
     while(1){ // loop do menu
-
-        al_draw_text(font, aqua, DEFAULT_WIDTH/2, 10, ALLEGRO_ALIGN_CENTRE, "boder dash");
-        al_draw_bitmap(logo, DEFAULT_WIDTH/5, 0, 0);
+        al_draw_bitmap(logo, DEFAULT_WIDTH/5, 20, 0);
         // al_draw_scaled_bitmap(logo, 0, 0, larguraLogo, alturaLogo, 300, 50 + OFF, larguraLogo/3, alturaLogo/3, 0);
         al_draw_text(font, branco, DEFAULT_WIDTH/2, 250, ALLEGRO_ALIGN_CENTER, "Pressione a barra de espaço para jogar");
         al_flip_display();
@@ -122,6 +127,8 @@ int main(){
     al_start_timer(timer_anim);
     al_start_timer(timer_pedras);
 
+    player.vidas = 3;
+
     while(1){ // game loop
         
         area = aloca_area(DEFAULT_WIDTH,DEFAULT_HEIGHT);
@@ -135,7 +142,7 @@ int main(){
         al_start_timer(relogio);
         // al_play_sample(sons.musica, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_LOOP, NULL);
 
-        while(player.vivo && !passou){ // game loop
+        while(player.vivo && !passou && !jogo.reset){ // game loop
 
             al_wait_for_event(queue, &event);
 
@@ -170,7 +177,7 @@ int main(){
                         }
 
                         else if((key[ALLEGRO_KEY_DOWN] || key[ALLEGRO_KEY_S]) && !colisao(area, DOWN, player)){
-                            if(area[player.y-1][player.x].tipo == SaidaAberta)
+                            if(area[player.y+1][player.x].tipo == SaidaAberta)
                                 passou = 1;
                             move_player(area, &player, DOWN);        
                             coleta_diamante(area, &player, &jogo, sons, &diamantes);
@@ -178,10 +185,10 @@ int main(){
                         }
 
                         else if((key[ALLEGRO_KEY_LEFT] || key[ALLEGRO_KEY_A]) && !colisao(area, LEFT, player)){
-                            if(area[player.y-1][player.x].tipo == SaidaAberta)
+                            if(area[player.y][player.x-1].tipo == SaidaAberta)
                                 passou = 1;
                             else if (area[player.y][player.x-1].tipo == Rock)
-                                empurra(area, &player, pedras, ESQUERDA);
+                                empurra(area, &player, pedras, LEFT);
                             else
                                 move_player(area, &player, LEFT);
                             coleta_diamante(area, &player, &jogo, sons, &diamantes); 
@@ -189,10 +196,10 @@ int main(){
                         }
 
                         else if((key[ALLEGRO_KEY_RIGHT] || key[ALLEGRO_KEY_D]) && !colisao(area, RIGHT, player)){
-                            if(area[player.y-1][player.x].tipo == SaidaAberta)
+                            if(area[player.y][player.x+1].tipo == SaidaAberta)
                                 passou = 1;
                             else if (area[player.y][player.x+1].tipo == Rock)
-                                empurra(area, &player, pedras, DIREITA);
+                                empurra(area, &player, pedras, LEFT);
                             else
                                 move_player(area, &player, RIGHT);
                             coleta_diamante(area, &player, &jogo, sons, &diamantes);
@@ -215,11 +222,13 @@ int main(){
 
                     jogo.t_restante = TEMPO_LIMITE - al_get_timer_count(relogio);
 
-                    if(jogo.d_restantes <= 0){
+                    if(jogo.d_restantes <= 0)
                         abre_saida(area, jogo);
-                    }
-                    if (jogo.t_restante == 0)
+                    if (jogo.t_restante == 0){
                         player.vivo = 0;
+                        al_draw_text(pixeboy, vermelho, DEFAULT_WIDTH/2, DEFAULT_HEIGHT/2, ALLEGRO_ALIGN_CENTER, "O TEMPO ACABOU!");
+                        al_rest(3.0);
+                    }
                     for(int i = 0; i < ALLEGRO_KEY_MAX; i++)
                         key[i] &= KEY_SEEN;
                     tela_jogo = 1;
@@ -228,11 +237,11 @@ int main(){
                     key[event.keyboard.keycode] = KEY_SEEN | KEY_RELEASED;
                     if (key[ALLEGRO_KEY_PGDN] && jogo.n_level > 1){
                         jogo.n_level--;
-                        player.vivo = 0;
+                        jogo.reset = 1;
                     }else
                     if (key[ALLEGRO_KEY_PGUP] && jogo.n_level < 10){
                         jogo.n_level++;
-                        player.vivo = 0;
+                        jogo.reset = 1;
                     }else
                     if (key[ALLEGRO_KEY_H]){
                         tela_help = 1;
@@ -250,11 +259,11 @@ int main(){
                 case ALLEGRO_EVENT_MOUSE_BUTTON_DOWN:
                     if ((event.mouse.button & 2) && jogo.n_level > 1){
                         jogo.n_level--;
-                        player.vivo = 0;
+                        jogo.reset = 1;
                     }else
                     if((event.mouse.button & 1) && jogo.n_level < 10){
                         jogo.n_level++;
-                        player.vivo = 0;
+                        jogo.reset = 1;
                     }
                     break;
                 case ALLEGRO_EVENT_KEY_UP:
@@ -296,11 +305,14 @@ int main(){
                 al_clear_to_color(preto);
                 al_draw_textf(font, branco, 10, 5, 0, "Diamantes restantes: %d", jogo.d_restantes);
                 al_draw_textf(font, branco, 200, 5, 0, "Score: %d", player.score);
+                al_draw_textf(font, branco, 300, 5, 0, "Vidas:");
+                for(int j = 1; j <= player.vidas; j++) // desenha as vidas
+                    al_draw_bitmap(heart, 340+(10*j), 4, 0);
                 // al_draw_textf(font, branco, 300, 5, 0, "%d Pedras %d Diamantes", conta_nodos(pedras), conta_nodos(diamantes));
                 // al_draw_textf(font, branco, 300, 5, 0, "");
                 al_draw_textf(font, branco, 500, 5, 0, "Time: %d", jogo.t_restante);
                 desenha_mapa(area, sprites);
-                if (player.dir == STILL){
+                if (player.dir == STILL){ // desenha o player
                     al_draw_bitmap(sprites.player[frame_player], player.x*16, player.y*16 + OFF, 0);
                 } else if (player.dir == LEFT){
                     al_draw_bitmap(sprites.player_left[frame_player], player.x*16, player.y*16 + OFF, 0);
@@ -317,17 +329,19 @@ int main(){
         }
 
         al_stop_timer(relogio);
-        al_set_timer_count(relogio, 0);
+        al_set_timer_count(relogio, 0); // reseta o relogio do jogo
         // al_stop_sample(music_id);
         if(passou)
             jogo.n_level++;
-        if(player.vivo == 0)
+        if(player.vivo == 0){
             for(i = 0; i < 5; i++){
                 al_wait_for_event(queue, &event);
                 if(event.type == ALLEGRO_EVENT_TIMER && event.timer.source == timer_anim)
                     explode(area, sprites, player.x, player.y, frame_explosao);
                 frame_explosao = counter % 5;
             }
+            player.vidas--;
+        }
 
         free(area[0]);
         free(area);
@@ -342,11 +356,14 @@ int main(){
     free(area[0]);
     free(area);
     al_destroy_font(font);
+    al_destroy_font(pixeboy);
     al_destroy_display(disp);
     al_destroy_timer(timer_fps);
     al_destroy_timer(timer_player);
     al_destroy_timer(timer_anim);
+    al_destroy_timer(relogio);
     al_destroy_event_queue(queue);
+    al_destroy_event_queue(qmenu);
     destroi_lista(&pedras);
     destroi_lista(&diamantes);
     destroi_lista(&butterflies);

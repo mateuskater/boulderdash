@@ -1,5 +1,5 @@
 CFLAGS = -Wall -g
-LDLIBS = $$(pkg-config allegro-5 allegro_font-5 allegro_image-5 allegro_audio-5 allegro_acodec-5 --cflags --libs)
+LDLIBS = $$(pkg-config allegro-5 allegro_font-5 allegro_image-5 allegro_audio-5 allegro_acodec-5 allegro_ttf-5 --cflags --libs)
 
 OBJS = game.o display.o lista.o init_sprites.o som.o funcoes.o
 

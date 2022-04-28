@@ -86,7 +86,7 @@ void desenha_diamantes(nodo *ini, t_sprites sprites, int frame){ // desenha todo
     }
 }
 
-void desenha_butterflies(nodo *ini, t_sprites sprites, int frame){ // desenha todos os diamantes da lista encadeada na tela
+void desenha_butterflies(nodo *ini, t_sprites sprites, int frame){ // desenha todas as butterflies da lista encadeada na tela
     nodo *aux = ini;
     while(aux != NULL){
         al_draw_bitmap(sprites.butterfly[frame], aux->x*16, aux->y*16 + OFF, 0);
@@ -94,7 +94,7 @@ void desenha_butterflies(nodo *ini, t_sprites sprites, int frame){ // desenha to
     }
 }
 
-void desenha_fireflies(nodo *ini, t_sprites sprites, int frame){ // desenha todos os diamantes da lista encadeada na tela
+void desenha_fireflies(nodo *ini, t_sprites sprites, int frame){ // desenha todas as fireflies da lista encadeada na tela
     nodo *aux = ini;
     while(aux != NULL){
         al_draw_bitmap(sprites.firefly[frame], aux->x*16, aux->y*16 + OFF, 0);
@@ -127,11 +127,11 @@ int atualiza_objetos(nodo **ini, tile **area, t_sprites sprites, char item){
             area[aux->y+1][aux->x].tipo = objeto; // o espaço de baixo vira o objeto em questão, pedra ou diamante
             area[aux->y][aux->x].tipo = Empty; 
             aux->y++;
-        }else if(rola(area, aux, DIREITA)){
+        }else if(rola(area, aux, RIGHT)){
             area[aux->y][aux->x+1].tipo = objeto; // caso direita e diagonal inferior direita estejam livres
             area[aux->y][aux->x].tipo = Empty; // pedra desliza para a direita
             aux->x++;
-        }else if(rola(area, aux, ESQUERDA)){
+        }else if(rola(area, aux, LEFT)){
             area[aux->y][aux->x-1].tipo = objeto; //caso esquerda e diagonal inferior esquerda estejam livres
             area[aux->y][aux->x].tipo = Empty; // pedra desliza para a esquerda
             aux->x--;
