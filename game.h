@@ -1,6 +1,10 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include <allegro5/allegro.h>
+#include <allegro5/allegro_font.h>
+#include <allegro5/allegro_image.h>
+
 #include "init_sprites.h"
 #include "som.h"
 
@@ -53,5 +57,6 @@ void desenha_mapa(tile **area, t_sprites sprites);
 void testa_init(bool test, const char *objeto);
 int explode(tile **area, t_sprites sprites, int x, int y, int frame);
 void abre_saida(tile **area, jogo jogo);
+void gera_tela_help(ALLEGRO_BITMAP **help);
 
 #endif

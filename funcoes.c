@@ -12,7 +12,7 @@
 
 tile **aloca_area(int lin, int col){
     int i;
-    tile **area;
+    tile **area; // aloca matriz de jogo com método vetor de ponteiros para linhas
     area = malloc(COL*sizeof(tile*));
     area[0] = calloc(LIN*COL, sizeof(tile));
     for(i=1; i<LIN; i++)
@@ -30,6 +30,8 @@ void inicializa_jogo(tile **area, jogador *player, nodo **pedras, nodo **diamant
     snprintf(buf, sizeof(buf), "./resources/level%d.txt", jogo->n_level);
     ALLEGRO_FILE *level = al_fopen(buf, "r");
     nodo *novo_item; // variavel tipo nodo para armazenar um item criado
+    if(!level) // se fopen for mal sucedido
+        exit(1);
 
     for(i = 0; i < LIN; i++)
         for(j = 0; j < COL; j++){
@@ -205,4 +207,10 @@ int explode(tile **area, t_sprites sprites, int x, int y, int frame){
 
 void abre_saida(tile **area, jogo jogo){
     area[jogo.saida_y][jogo.saida_x].tipo = SaidaAberta;
+}
+
+void gera_tela_help(ALLEGRO_BITMAP **help){
+    help[0] = al_load_bitmap("./resources/help1.png");
+    help[1] = al_load_bitmap("./resources/help2.png");
+    help[2] = al_load_bitmap("./resources/help3.png");
 }

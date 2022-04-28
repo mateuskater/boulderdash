@@ -22,6 +22,7 @@ int main(){
     nodo *fireflies = NULL;
     nodo *diamante_coletado = NULL;
     jogo jogo = {0, 0, 0};
+    int n_tela = 0; // para a tela de ajuda
     int passou = 0; // variavel para controlar se o personagem passou de fase
 
     testa_init(al_init(), "allegro"); // inicializa a engine do allegro
@@ -30,11 +31,12 @@ int main(){
     testa_init(queue, "queue");
     ALLEGRO_EVENT_QUEUE* qmenu = al_create_event_queue();
     testa_init(qmenu, "queue do menu");
+    // ALLEGRO_EVENT_QUEUE* mouse_queue = al_create_event_queue();
+    // testa_init(mouse_queue, "queue do mouse");
     ALLEGRO_DISPLAY* disp = inicializa_tela(DEFAULT_WIDTH*2, DEFAULT_HEIGHT*2);
     testa_init(disp, "display");
     ALLEGRO_FONT* font = al_create_builtin_font();
     testa_init(font, "addon de fonte");
-
     memset(key, 0, sizeof(key));
     
     testa_init(al_install_keyboard(), "teclado");
@@ -52,17 +54,19 @@ int main(){
     ALLEGRO_BITMAP *logo = al_load_bitmap("./resources/bdlogo.png");
     testa_init(logo, "logo");
 
+    ALLEGRO_BITMAP **help = calloc(3, sizeof(ALLEGRO_BITMAP*));
+    gera_tela_help(help);
+
     al_register_event_source(queue, al_get_keyboard_event_source());
     al_register_event_source(queue, al_get_display_event_source(disp));
     al_register_event_source(qmenu, al_get_keyboard_event_source());
     al_register_event_source(qmenu, al_get_display_event_source(disp));
 
+    // int redesenhar = 1;
     int tela_jogo = 1; // para sinalizar se deve desenhar tela do jogo
-    int tela_ajuda = 0; // para sinalizar se deve desenhar a tela de ajuda
+    int tela_help = 0; // para sinalizar se deve desenhar a tela de help
     int flagBreak = 0; // uma flag para sair do while se estiver dentro de um switch
     ALLEGRO_EVENT event;
-    
-    
 
     jogo.n_level = 1;
     player.score = 0;
@@ -152,7 +156,7 @@ int main(){
                             player.vivo = explode(area, sprites, player.x, player.y, 0);
                         if(atualiza_fireflies(&fireflies, area, sprites, &player))
                             player.vivo = explode(area, sprites, player.x, player.y, 0);
-                        if(atualiza_butterflies(&butterflies, area, sprites, &player))
+                        if(atualiza_butterflies(&butterflies, &diamantes, area, sprites, &player))
                             player.vivo = explode(area, sprites, player.x, player.y, 0);
                     }
 
@@ -216,27 +220,39 @@ int main(){
                     }
                     if (jogo.t_restante == 0)
                         player.vivo = 0;
-                    if (key[ALLEGRO_KEY_H]){
-                        tela_ajuda = 1;
-                        tela_jogo = 0;
-                    }
-                    if(key[ALLEGRO_KEY_M]){
-                        sprites.rock = sprites.prof;
-                    }
-                    if(key[ALLEGRO_KEY_ESCAPE])
-                        exit(0);
                     for(int i = 0; i < ALLEGRO_KEY_MAX; i++)
                         key[i] &= KEY_SEEN;
-                    tela_jogo = true;
+                    tela_jogo = 1;
                     break;
-
                 case ALLEGRO_EVENT_KEY_DOWN:
                     key[event.keyboard.keycode] = KEY_SEEN | KEY_RELEASED;
                     if (key[ALLEGRO_KEY_PGDN] && jogo.n_level > 1){
                         jogo.n_level--;
                         player.vivo = 0;
-                    }
+                    }else
                     if (key[ALLEGRO_KEY_PGUP] && jogo.n_level < 10){
+                        jogo.n_level++;
+                        player.vivo = 0;
+                    }else
+                    if (key[ALLEGRO_KEY_H]){
+                        tela_help = 1;
+                        tela_jogo = 0;
+                    }else
+                    if(key[ALLEGRO_KEY_M]){
+                        sprites.rock = sprites.prof;
+                    }else
+                    if(key[ALLEGRO_KEY_R]){
+                        player.vivo = 0;
+                    }
+                    if(key[ALLEGRO_KEY_ESCAPE])
+                        exit(0);
+                    break;
+                case ALLEGRO_EVENT_MOUSE_BUTTON_DOWN:
+                    if ((event.mouse.button & 2) && jogo.n_level > 1){
+                        jogo.n_level--;
+                        player.vivo = 0;
+                    }else
+                    if((event.mouse.button & 1) && jogo.n_level < 10){
                         jogo.n_level++;
                         player.vivo = 0;
                     }
@@ -248,21 +264,35 @@ int main(){
                 case ALLEGRO_EVENT_DISPLAY_CLOSE:
                     exit(0);
             }
-            while(tela_ajuda){
+
+            while(tela_help){
                 al_stop_timer(relogio);
                 al_stop_timer(timer_anim);
                 al_stop_timer(timer_player);
                 al_stop_timer(timer_pedras);
-                al_clear_to_color(preto);
-                al_draw_text(font, branco, DEFAULT_WIDTH/2, 5, ALLEGRO_ALIGN_CENTER, "Ajuda");
-
-
+                al_set_target_backbuffer(disp);
+                al_draw_bitmap(help[n_tela], 0, 0, 0);
+                al_flip_display();
+                al_wait_for_event(queue, &event);
+                if(event.type == ALLEGRO_EVENT_KEY_DOWN){
+                    if(key[ALLEGRO_KEY_H]){
+                        tela_help = 0;
+                        tela_jogo = 1;
+                        al_resume_timer(relogio);
+                        al_resume_timer(timer_anim);
+                        al_resume_timer(timer_player);
+                        al_resume_timer(timer_pedras);
+                    }else if(key[ALLEGRO_KEY_RIGHT] && n_tela < 2)
+                        n_tela++;
+                    else if(key[ALLEGRO_KEY_LEFT] && n_tela > 0)
+                        n_tela--;
+                }else if(event.type == ALLEGRO_EVENT_KEY_UP)
+                    key[event.keyboard.keycode] &= KEY_RELEASED;
             }
-            if(tela_jogo && al_is_event_queue_empty(queue) && event.timer.source == timer_fps){
-                if(jogo.d_restantes == 0){
-                    al_clear_to_color(branco);
+
+            if(tela_jogo && event.timer.source == timer_fps){
+                if(jogo.d_restantes == 0)
                     al_draw_text(font, branco, 300, 5, 0, "Saída Aberta!");
-                }
                 al_clear_to_color(preto);
                 al_draw_textf(font, branco, 10, 5, 0, "Diamantes restantes: %d", jogo.d_restantes);
                 al_draw_textf(font, branco, 200, 5, 0, "Score: %d", player.score);

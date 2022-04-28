@@ -13,6 +13,8 @@ nodo *inicializa_lista(){ // inicializa uma lista encadeada
 
 nodo *cria_nodo(int caindo, int x, int y){ // cria um nodo e o retorna
     nodo *new = malloc(sizeof(nodo));
+    if(!new) // testa malloc
+        exit(1);
     new->caindo = caindo;
     new->x = x;
     new->y = y;
@@ -190,7 +192,6 @@ int atualiza_fireflies(nodo **bichos, tile **area, t_sprites sprites, jogador *p
         if(aux->dir == RIGHT)
             switch(area[aux->y][aux->x+1].tipo){ // checa o espaço da direita
                 case Empty:
-                    
                     area[aux->y][aux->x+1].tipo = Enemy;
                     area[aux->y][aux->x].tipo = Empty;
                     aux->x++;
@@ -212,16 +213,17 @@ int atualiza_fireflies(nodo **bichos, tile **area, t_sprites sprites, jogador *p
     return 0;
 }
 
-int atualiza_butterflies(nodo **bichos, tile **area, t_sprites sprites, jogador *player){
+int atualiza_butterflies(nodo **bichos, nodo **diamantes, tile **area, t_sprites sprites, jogador *player){
     nodo *aux = *bichos, *temp;
+    short j;
 
     while(aux->next != NULL){     
         if(aux->dir == UP)
             switch(area[aux->y-1][aux->x].tipo){ // checa o espaço de cima
                 case Empty: // se for vazio, prossegue para aquela direcao
-                    aux->y--;
                     area[aux->y-1][aux->x].tipo = Enemy;
                     area[aux->y][aux->x].tipo = Empty;
+                    aux->y--;
                     break;
                 case Player: // se for player, mata o player
                     return 1;
@@ -233,9 +235,9 @@ int atualiza_butterflies(nodo **bichos, tile **area, t_sprites sprites, jogador 
         if(aux->dir == RIGHT)
             switch(area[aux->y][aux->x+1].tipo){ //checa o espaço da esquerda
                 case Empty:
-                    aux->x++;
                     area[aux->y][aux->x+1].tipo = Enemy;
                     area[aux->y][aux->x].tipo = Empty;
+                    aux->x++;
                     break;
                 case Player:
                     return 1;
@@ -247,9 +249,9 @@ int atualiza_butterflies(nodo **bichos, tile **area, t_sprites sprites, jogador 
         if(aux->dir == DOWN)
             switch(area[aux->y+1][aux->x].tipo){ // checa o espaço de baixo
                 case Empty:
-                    aux->y++;
                     area[aux->y+1][aux->x].tipo = Enemy;
                     area[aux->y][aux->x].tipo = Empty;
+                    aux->y++;
                     break;
                 case Player:
                     return 1;
@@ -261,9 +263,9 @@ int atualiza_butterflies(nodo **bichos, tile **area, t_sprites sprites, jogador 
         if(aux->dir == LEFT)
             switch(area[aux->y][aux->x-1].tipo){ // checa o espaço da direita
                 case Empty:
-                    aux->x--;
                     area[aux->y][aux->x-1].tipo = Enemy;
                     area[aux->y][aux->x].tipo = Empty;
+                    aux->x--;
                     break;
                 case Player:
                     return 1;
@@ -276,6 +278,8 @@ int atualiza_butterflies(nodo **bichos, tile **area, t_sprites sprites, jogador 
         if(area[aux->y-1][aux->x].tipo == Rock){
             explode(area, sprites, aux->x, aux->y, 0);
             deleta_nodo(bichos, temp);
+            for(j = -2; j < 4; j++)
+                insere_nodo(diamantes, cria_nodo(0, aux->x+j, aux->y-1));
         }
         aux = aux->next;
     }
