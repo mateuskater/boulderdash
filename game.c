@@ -220,14 +220,13 @@ int main(){
 
                     if(jogo.d_restantes <= 0)
                         abre_saida(area, jogo);
-                    if (jogo.t_restante == 0){
+                    if (jogo.t_restante == 0)
                         player.vivo = 0;
-                        al_rest(2.0);
-                    }
                     for(int i = 0; i < ALLEGRO_KEY_MAX; i++)
                         key[i] &= KEY_SEEN;
                     tela_jogo = 1;
                     break;
+
                 case ALLEGRO_EVENT_KEY_DOWN:
                     key[event.keyboard.keycode] = KEY_SEEN | KEY_RELEASED;
                     if (key[ALLEGRO_KEY_PGDN] && jogo.n_level > 1){
@@ -340,6 +339,10 @@ int main(){
             }
             player.vidas--;
             al_play_sample(sons.morreu, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
+        }
+        if(player.vidas == 0){
+            player.score = 0;
+            player.vidas = 3;
         }
 
         free(area[0]);
