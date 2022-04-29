@@ -240,11 +240,11 @@ int main(){
                         exit(0);
                     break;
                 case ALLEGRO_EVENT_MOUSE_BUTTON_DOWN:
-                    if ((event.mouse.button & 1) && event.mouse.x < 50 &&jogo.n_level > 1){
+                    if ((event.mouse.button & 1) && jogo.n_level > 1){
                         jogo.n_level--;
                         jogo.reset = 1;
                     }else
-                    if((event.mouse.button & 1) && event.mouse.x > (DEFAULT_WIDTH - 50) && jogo.n_level < 10){
+                    if((event.mouse.button & 2) && jogo.n_level < 10){
                         jogo.n_level++;
                         jogo.reset = 1;
                     }
