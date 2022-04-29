@@ -23,7 +23,7 @@ int main(){
     nodo *fireflies = NULL;
     nodo *diamante_coletado = NULL;
     jogo jogo = {0};
-    ALLEGRO_SAMPLE_ID *id_musica = NULL;
+    ALLEGRO_SAMPLE_ID id_musica;
     int n_tela = 0; // para a tela de ajuda
     int passou = 0; // variavel para controlar se o personagem passou de fase
 
@@ -140,7 +140,7 @@ int main(){
         jogo.n_diams = conta_nodos(diamantes) + 6*jogo.n_butterflies;
         jogo.d_restantes = (int)jogo.n_diams*(0.7);
         al_start_timer(relogio);
-        al_play_sample(sons.musica, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_LOOP, id_musica);
+        al_play_sample(sons.musica, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_LOOP, &id_musica);
 
         while(player.vivo && !passou && !jogo.reset){ // game loop
 
@@ -324,7 +324,7 @@ int main(){
 
         al_stop_timer(relogio);
         al_set_timer_count(relogio, 0); // reseta o relogio do jogo
-        al_stop_sample(id_musica);
+        al_stop_sample(&id_musica);
         if(passou){ // se passou, sobe o nivel 
             jogo.n_level++;
             al_play_sample(sons.vitoria, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
