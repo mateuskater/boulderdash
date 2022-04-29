@@ -10,6 +10,7 @@ t_sons carrega_sons(void){
     sons.musica = al_load_sample("./resources/sounds/bg_music.ogg");
     sons.morreu = al_load_sample("./resources/sounds/lose.wav");
     sons.vitoria = al_load_sample("./resources/sounds/win.wav");
+    sons.gameover = al_load_sample("./resources/sounds/gameover.wav")
     return sons;
 }
 

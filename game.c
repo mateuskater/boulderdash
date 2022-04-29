@@ -339,6 +339,7 @@ int main(){
         if(player.vidas == 0){
             player.score = 0;
             player.vidas = 3;
+            al_play_sample(sons.gameover, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
         }
 
         free(area[0]);
