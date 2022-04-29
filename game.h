@@ -11,14 +11,14 @@
 #define KEY_SEEN 1
 #define KEY_RELEASED 2
 
-#define LIN 23
+#define LIN 23 // dimensões da área de jogo
 #define COL 40
 
 #define STILL 0
-#define UP 1
-#define RIGHT 2
+#define UP 2
+#define RIGHT 1
 #define DOWN 3
-#define LEFT 4
+#define LEFT -1
 
 #define TEMPO_LIMITE 150
 #define OFF 16 // offset para dar espaço ao HUD
@@ -40,7 +40,7 @@ typedef struct tile{
 }tile;
 
 typedef struct jogo{
-    int n_level, d_restantes, n_diams, t_restante;
+    int n_level, d_restantes, n_diams, t_restante, n_butterflies;
     int saida_x, saida_y; // coordenadas da saida do level
     int reset; //variavel para sair do loop, reiniciar o level ou trocar de level
 }jogo;

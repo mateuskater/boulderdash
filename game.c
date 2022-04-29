@@ -23,6 +23,7 @@ int main(){
     nodo *fireflies = NULL;
     nodo *diamante_coletado = NULL;
     jogo jogo = {0};
+    ALLEGRO_SAMPLE_ID *id_musica = NULL;
     int n_tela = 0; // para a tela de ajuda
     int passou = 0; // variavel para controlar se o personagem passou de fase
 
@@ -32,22 +33,18 @@ int main(){
     testa_init(queue, "queue");
     ALLEGRO_EVENT_QUEUE* qmenu = al_create_event_queue();
     testa_init(qmenu, "queue do menu");
-    // ALLEGRO_EVENT_QUEUE* mouse_queue = al_create_event_queue();
-    // testa_init(mouse_queue, "queue do mouse");
     ALLEGRO_DISPLAY* disp = inicializa_tela(DEFAULT_WIDTH*2, DEFAULT_HEIGHT*2);
     testa_init(disp, "display");
     ALLEGRO_FONT* font = al_create_builtin_font();
     testa_init(font, "addon de fonte");
-    // ALLEGRO_FONT* pixeboy = al_load_ttf_font("./resources/pixeboy.ttf", 12, 0);
-    // esta_init(pixeboy, "fonte bolada");
     memset(key, 0, sizeof(key));
     
     testa_init(al_install_keyboard(), "teclado");
     testa_init(al_install_mouse(), "mouse");
 
-    //testa_init(al_install_audio(), "audio");
-    //testa_init(al_init_acodec_addon(), "codecs de audio");
-    //testa_init(al_reserve_samples(16), "reserve samples");
+    testa_init(al_install_audio(), "audio");
+    testa_init(al_init_acodec_addon(), "codecs de audio");
+    testa_init(al_reserve_samples(16), "reserve samples");
     t_sons sons = carrega_sons();
     testa_init(al_init_image_addon(), "addon de imagem");
     t_sprites sprites = carrega_sprites();
@@ -131,21 +128,19 @@ int main(){
 
     player.vidas = 3;
 
-    int hmm = 0;
-
     while(1){ // game loop
         
         area = aloca_area(DEFAULT_WIDTH,DEFAULT_HEIGHT);
-        pedras = inicializa_lista();
-        diamantes = inicializa_lista();
-        butterflies = inicializa_lista();
-        fireflies = inicializa_lista();
+        pedras = inicializa_lista(); //
+        diamantes = inicializa_lista(); // inicializa listas
+        butterflies = inicializa_lista(); //
+        fireflies = inicializa_lista(); //
         inicializa_jogo(area, &player, &pedras, &diamantes, &butterflies, &fireflies, &jogo);
-        jogo.n_diams = conta_nodos(diamantes);
-        jogo.d_restantes = jogo.n_diams;
+        jogo.n_butterflies = conta_nodos(butterflies);
+        jogo.n_diams = conta_nodos(diamantes) + 6*jogo.n_butterflies;
+        jogo.d_restantes = (int)jogo.n_diams*(0.7);
         al_start_timer(relogio);
-        hmm++;
-        // al_play_sample(sons.musica, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_LOOP, NULL);
+        al_play_sample(sons.musica, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_LOOP, id_musica);
 
         while(player.vivo && !passou && !jogo.reset){ // game loop
 
@@ -178,7 +173,7 @@ int main(){
                                 passou = 1;
                             move_player(area, &player, UP);
                             coleta_diamante(area, &player, &jogo, sons, &diamantes);
-                            // al_play_sample(sons.terra, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
+                            al_play_sample(sons.terra, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
                         }
 
                         else if((key[ALLEGRO_KEY_DOWN] || key[ALLEGRO_KEY_S]) && !colisao(area, DOWN, player)){
@@ -186,7 +181,7 @@ int main(){
                                 passou = 1;
                             move_player(area, &player, DOWN);        
                             coleta_diamante(area, &player, &jogo, sons, &diamantes);
-                            // al_play_sample(sons.terra, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
+                            al_play_sample(sons.terra, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
                         }
 
                         else if((key[ALLEGRO_KEY_LEFT] || key[ALLEGRO_KEY_A]) && !colisao(area, LEFT, player)){
@@ -197,23 +192,23 @@ int main(){
                             else
                                 move_player(area, &player, LEFT);
                             coleta_diamante(area, &player, &jogo, sons, &diamantes); 
-                            // al_play_sample(sons.terra, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
+                            al_play_sample(sons.terra, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
                         }
 
                         else if((key[ALLEGRO_KEY_RIGHT] || key[ALLEGRO_KEY_D]) && !colisao(area, RIGHT, player)){
                             if(area[player.y][player.x+1].tipo == SaidaAberta)
                                 passou = 1;
                             else if (area[player.y][player.x+1].tipo == Rock)
-                                empurra(area, &player, pedras, LEFT);
+                                empurra(area, &player, pedras, RIGHT);
                             else
                                 move_player(area, &player, RIGHT);
                             coleta_diamante(area, &player, &jogo, sons, &diamantes);
-                            // al_play_sample(sons.terra, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
+                            al_play_sample(sons.terra, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
                         }else player.dir = STILL;
 
                         if(area[player.y][player.x].tipo == Dirt){ //cava
                             area[player.y][player.x].tipo = Empty;
-                            // al_play_sample(sons.terra, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
+                            al_play_sample(sons.terra, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
                         }
                             
                         if(area[player.y][player.x].tipo == Diamond){ // coleta diamante
@@ -231,8 +226,7 @@ int main(){
                         abre_saida(area, jogo);
                     if (jogo.t_restante == 0){
                         player.vivo = 0;
-                        // al_draw_text(pixeboy, vermelho, DEFAULT_WIDTH/2, DEFAULT_HEIGHT/2, ALLEGRO_ALIGN_CENTER, "O TEMPO ACABOU!");
-                        al_rest(3.0);
+                        al_rest(2.0);
                     }
                     for(int i = 0; i < ALLEGRO_KEY_MAX; i++)
                         key[i] &= KEY_SEEN;
@@ -314,7 +308,6 @@ int main(){
                 for(int j = 1; j <= player.vidas; j++) // desenha as vidas
                     al_draw_bitmap(heart, 340+(10*j), 4, 0);
                 // al_draw_textf(font, branco, 300, 5, 0, "%d Pedras %d Diamantes", conta_nodos(pedras), conta_nodos(diamantes));
-                // al_draw_textf(font, branco, 300, 5, 0, "");
                 al_draw_textf(font, branco, 500, 5, 0, "Time: %d", jogo.t_restante);
                 desenha_mapa(area, sprites);
                 if (player.dir == STILL){ // desenha o player
@@ -335,10 +328,14 @@ int main(){
 
         al_stop_timer(relogio);
         al_set_timer_count(relogio, 0); // reseta o relogio do jogo
-        // al_stop_sample(music_id);
-        if(passou)
+        al_stop_sample(id_musica);
+        if(passou){ // se passou, sobe o nivel 
             jogo.n_level++;
-        if(player.vivo == 0){
+            al_play_sample(sons.vitoria, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
+        }
+
+        if(player.vivo == 0){ // se morreu, 
+            al_rest(2.0);
             for(i = 0; i < 5; i++){
                 al_wait_for_event(queue, &event);
                 if(event.type == ALLEGRO_EVENT_TIMER && event.timer.source == timer_anim)
@@ -346,6 +343,7 @@ int main(){
                 frame_explosao = counter % 5;
             }
             player.vidas--;
+            al_play_sample(sons.morreu, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
         }
 
         free(area[0]);
@@ -362,7 +360,6 @@ int main(){
     free(area[0]);
     free(area);
     al_destroy_font(font);
-    // al_destroy_font(pixeboy);
     al_destroy_display(disp);
     al_destroy_timer(timer_fps);
     al_destroy_timer(timer_player);
@@ -370,6 +367,7 @@ int main(){
     al_destroy_timer(relogio);
     al_destroy_event_queue(queue);
     al_destroy_event_queue(qmenu);
+    destroi_audio(&sons);
     destroi_lista(&pedras);
     destroi_lista(&diamantes);
     destroi_lista(&butterflies);

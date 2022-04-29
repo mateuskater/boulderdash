@@ -61,7 +61,7 @@ int deleta_nodo(nodo **ini, nodo *select){ // deleta um nodo fornecido como para
 
 int conta_nodos(nodo *ini){ // retorna a quantidade de nodos na lista
     nodo *aux = ini;
-    int i = 1;
+    int i = 0;
     while(aux->next != NULL){
         aux = aux->next;
         i++;
