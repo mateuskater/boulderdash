@@ -95,13 +95,10 @@ int main(){
             case ALLEGRO_KEY_ESCAPE:
                 exit(0);
                 break;
-            case ALLEGRO_KEY_BACKSPACE:
-                exit(0);
-                break;
             case ALLEGRO_KEY_ENTER:
                 al_draw_text(font, aqua, 80, 200, 0 + OFF, "aperta espaço pora");
                 break;
-            case ALLEGRO_KEY_SPACE:
+            case ALLEGRO_KEY_SPACE: // aperta espaco para prosseguir
                 flagBreak = 1;
                 break;
             default :
@@ -288,15 +285,14 @@ int main(){
                 al_clear_to_color(preto);
                 if(jogo.d_restantes == 0)
                     al_draw_text(font, branco, 300, 5, 0, "Saída Aberta!");
-                if(easter_egg)
+                if(easter_egg) // desenha o easter egg
                     al_draw_bitmap(sprites.menottidash, 0, 0, 0);
                 al_draw_textf(font, branco, 10, 5, 0, "Diamantes restantes: %d", jogo.d_restantes);
                 al_draw_textf(font, branco, 200, 5, 0, "Score: %d", player.score);
                 al_draw_textf(font, branco, 300, 5, 0, "Vidas:");
                 for(int j = 1; j <= player.vidas; j++) // desenha as vidas
                     al_draw_bitmap(sprites.heart, 340+(10*j), 4, 0);
-                // al_draw_textf(font, branco, 300, 5, 0, "%d Pedras %d Diamantes", conta_nodos(pedras), conta_nodos(diamantes));
-                al_draw_textf(font, branco, 500, 5, 0, "Time: %d", jogo.t_restante);
+                al_draw_textf(font, branco, 500, 5, 0, "Time: %d", jogo.t_restante); // desenha o tempo restante
                 desenha_mapa(area, sprites);
                 if (player.dir == STILL){ // desenha o player
                     al_draw_bitmap(sprites.player[frame_player], player.x*16, player.y*16 + OFF, 0);
@@ -305,10 +301,10 @@ int main(){
                 }else if (player.dir == RIGHT){
                     al_draw_bitmap(sprites.player_right[frame_player], player.x*16, player.y*16 + OFF, 0);
                 }
-                if(easter_egg)
+                if(easter_egg) // desenha o easter egg
                     desenha_menotti(pedras, sprites);
                 else
-                    desenha_pedras(pedras, sprites);
+                    desenha_pedras(pedras, sprites); // desenha pedras normalmente
                 desenha_diamantes(diamantes, sprites, frame_diamante);
                 desenha_butterflies(butterflies, sprites, frame_inimigos);
                 desenha_fireflies(fireflies, sprites, frame_inimigos);
@@ -326,7 +322,6 @@ int main(){
         }
 
         if(player.vivo == 0){ // se morreu, 
-            al_rest(2.0);
             for(i = 0; i < 5; i++){
                 al_wait_for_event(queue, &event);
                 if(event.type == ALLEGRO_EVENT_TIMER && event.timer.source == timer_anim)
