@@ -130,6 +130,7 @@ int main(){
         jogo.n_butterflies = conta_nodos(butterflies);
         jogo.n_diams = conta_nodos(diamantes) + 6*jogo.n_butterflies;
         jogo.d_restantes = (int)jogo.n_diams*(0.7);
+        player.score_anterior = player.score;
         al_start_timer(relogio);
         al_play_sample(sons.musica, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_LOOP, &id_musica);
 
@@ -239,7 +240,7 @@ int main(){
                         exit(0);
                     break;
                 case ALLEGRO_EVENT_MOUSE_BUTTON_DOWN:
-                    if ((event.mouse.button & 2) && event.mouse.x < 50 &&jogo.n_level > 1){
+                    if ((event.mouse.button & 1) && event.mouse.x < 50 &&jogo.n_level > 1){
                         jogo.n_level--;
                         jogo.reset = 1;
                     }else
@@ -328,6 +329,7 @@ int main(){
                     explode(area, sprites, player.x, player.y, frame_explosao);
                 frame_explosao = counter % 5;
             }
+            player.score = player.score_anterior;
             player.vidas--;
             al_play_sample(sons.morreu, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
         }

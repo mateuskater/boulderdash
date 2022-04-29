@@ -33,6 +33,7 @@ typedef struct jogador{
     int x, y; // coordenadas do jogador
     int score, dir; // pontuação e direção que ele está indo
     int vivo, vidas; //se ele está vivo ou quantidade de vidas
+    int score_anterior;
 }jogador;
 
 typedef struct tile{
