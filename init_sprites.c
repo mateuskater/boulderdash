@@ -45,7 +45,7 @@ t_sprites carrega_sprites(void){
     }
 
     sprites.logo = al_load_bitmap("./resources/bdlogo.png");
-    sprites.prof = al_load_bitmap("./resources/David-Menotti.png");
+    sprites.prof = al_load_bitmap("./resources/menotti.png");
     sprites.heart = al_load_bitmap("./resources/heart.png");
     sprites.menottidash = al_load_bitmap("./resources/menottidash.png");
 
