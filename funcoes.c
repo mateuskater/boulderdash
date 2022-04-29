@@ -97,13 +97,13 @@ int colisao(tile **area, int direcao, jogador player){
         baixo = area[py+1][px].tipo,
         direita = area[py][px+1].tipo;
     
-    if (direcao == UP && (cima == Empty || cima == Dirt || cima == Diamond)) // condicoes para nao ter colisao
+    if (direcao == UP && (cima == Empty || cima == Dirt || cima == Diamond || cima == SaidaAberta)) // condicoes para nao ter colisao
         return 0; // retorna 0 se nao existir colisao
-    if (direcao == LEFT && (esquerda == Empty || esquerda == Dirt || esquerda == Diamond))
+    if (direcao == LEFT && (esquerda == Empty || esquerda == Dirt || esquerda == Diamond || esquerda == SaidaAberta))
         return 0;
-    if (direcao == DOWN && (baixo == Empty || baixo == Dirt || baixo == Diamond))
+    if (direcao == DOWN && (baixo == Empty || baixo == Dirt || baixo == Diamond || baixo == SaidaAberta))
         return 0;
-    if (direcao == RIGHT && (direita == Empty || direita == Dirt || direita == Diamond))
+    if (direcao == RIGHT && (direita == Empty || direita == Dirt || direita == Diamond || direita == SaidaAberta))
         return 0;
     if (direcao == LEFT && (esquerda == Rock && area[py][px-2].tipo == Empty))
         return 0; // testa tambem os casos de poder empurrar
@@ -161,7 +161,7 @@ void coleta_diamante(tile **area, jogador *player, jogo *jogo, t_sons sons, nodo
         deleta_nodo(diamantes, diamante_coletado);
         player->score += 10;
         jogo->d_restantes--;
-        // al_play_sample(sons.diamante, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
+        al_play_sample(sons.diamante, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
     }
 }
 

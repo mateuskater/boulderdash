@@ -173,7 +173,6 @@ int main(){
                                 passou = 1;
                             move_player(area, &player, UP);
                             coleta_diamante(area, &player, &jogo, sons, &diamantes);
-                            al_play_sample(sons.terra, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
                         }
 
                         else if((key[ALLEGRO_KEY_DOWN] || key[ALLEGRO_KEY_S]) && !colisao(area, DOWN, player)){
@@ -181,7 +180,6 @@ int main(){
                                 passou = 1;
                             move_player(area, &player, DOWN);        
                             coleta_diamante(area, &player, &jogo, sons, &diamantes);
-                            al_play_sample(sons.terra, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
                         }
 
                         else if((key[ALLEGRO_KEY_LEFT] || key[ALLEGRO_KEY_A]) && !colisao(area, LEFT, player)){
@@ -192,7 +190,6 @@ int main(){
                             else
                                 move_player(area, &player, LEFT);
                             coleta_diamante(area, &player, &jogo, sons, &diamantes); 
-                            al_play_sample(sons.terra, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
                         }
 
                         else if((key[ALLEGRO_KEY_RIGHT] || key[ALLEGRO_KEY_D]) && !colisao(area, RIGHT, player)){
@@ -203,7 +200,6 @@ int main(){
                             else
                                 move_player(area, &player, RIGHT);
                             coleta_diamante(area, &player, &jogo, sons, &diamantes);
-                            al_play_sample(sons.terra, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
                         }else player.dir = STILL;
 
                         if(area[player.y][player.x].tipo == Dirt){ //cava
