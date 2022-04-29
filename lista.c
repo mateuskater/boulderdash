@@ -102,6 +102,14 @@ void desenha_fireflies(nodo *ini, t_sprites sprites, int frame){ // desenha toda
     }
 }
 
+void desenha_menotti(nodo *ini, t_sprites sprites){ // desenha o prof
+    nodo *aux = ini;
+    while(aux != NULL){
+        al_draw_scaled_bitmap(sprites.prof, 0, 0, 166, 240, aux->x*16, aux->y*16 + OFF, 16, 16, 0);
+        aux = aux->next;
+    }
+}
+
 int rola(tile **area, nodo *atual, int dir){ // verifica se o objeto deve rolar
     if((area[atual->y+1][atual->x].tipo == Rock || area[atual->y+1][atual->x].tipo == Brick || area[atual->y+1][atual->x].tipo == Diamond) 
                 && area[atual->y][atual->x+dir].tipo == Empty // caso tenha brick, rock ou diamond em baixo
@@ -165,7 +173,7 @@ int atualiza_fireflies(nodo **bichos, tile **area, t_sprites sprites, jogador *p
                    
                     area[aux->y][aux->x-1].tipo = Enemy;
                     area[aux->y][aux->x].tipo = Empty;
-                     aux->x--;
+                    aux->x--;
                     break;
                 case Player:
                     return 1;
@@ -233,7 +241,7 @@ int atualiza_butterflies(nodo **bichos, nodo **diamantes, tile **area, t_sprites
                     break;
             }
         if(aux->dir == RIGHT)
-            switch(area[aux->y][aux->x+1].tipo){ //checa o espaço da esquerda
+            switch(area[aux->y][aux->x+1].tipo){ //checa o espaço da direita
                 case Empty:
                     area[aux->y][aux->x+1].tipo = Enemy;
                     area[aux->y][aux->x].tipo = Empty;
@@ -261,7 +269,7 @@ int atualiza_butterflies(nodo **bichos, nodo **diamantes, tile **area, t_sprites
                     break;
             }
         if(aux->dir == LEFT)
-            switch(area[aux->y][aux->x-1].tipo){ // checa o espaço da direita
+            switch(area[aux->y][aux->x-1].tipo){ // checa o espaço da esquerda
                 case Empty:
                     area[aux->y][aux->x-1].tipo = Enemy;
                     area[aux->y][aux->x].tipo = Empty;

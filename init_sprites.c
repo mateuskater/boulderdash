@@ -44,7 +44,10 @@ t_sprites carrega_sprites(void){
         sprites.butterfly[i] = al_create_sub_bitmap(sheet, 96, 64+(i*16), 16, 16);
     }
 
+    sprites.logo = al_load_bitmap("./resources/bdlogo.png");
     sprites.prof = al_load_bitmap("./resources/David-Menotti.png");
+    sprites.heart = al_load_bitmap("./resources/heart.png");
+    sprites.menottidash = al_load_bitmap("./resources/menottidash.png");
 
     return sprites;
 }

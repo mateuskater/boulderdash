@@ -13,6 +13,7 @@ void desenha_pedras(nodo *ini, t_sprites sprites);
 void desenha_diamantes(nodo *ini, t_sprites sprites, int frame);
 void desenha_fireflies(nodo *ini, t_sprites sprites, int frame);
 void desenha_butterflies(nodo *ini, t_sprites sprites, int frame);
+void desenha_menotti(nodo *ini, t_sprites sprites);
 int rola(tile **area, nodo *atual, int dir);
 int atualiza_objetos(nodo **ini, tile **area, t_sprites sprites, char item);
 int atualiza_fireflies(nodo **bichos, tile **area, t_sprites sprites, jogador *player);

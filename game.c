@@ -21,44 +21,38 @@ int main(){
     nodo *diamantes = NULL;
     nodo *butterflies = NULL;
     nodo *fireflies = NULL;
-    nodo *diamante_coletado = NULL;
     jogo jogo = {0};
     ALLEGRO_SAMPLE_ID id_musica;
     int n_tela = 0; // para a tela de ajuda
     int passou = 0; // variavel para controlar se o personagem passou de fase
+    int easter_egg = 0; //flag para o easter egg
 
     testa_init(al_init(), "allegro"); // inicializa a engine do allegro
     
-    ALLEGRO_EVENT_QUEUE* queue = al_create_event_queue();
+    ALLEGRO_EVENT_QUEUE* queue = al_create_event_queue(); // cria filas de evento
     testa_init(queue, "queue");
     ALLEGRO_EVENT_QUEUE* qmenu = al_create_event_queue();
     testa_init(qmenu, "queue do menu");
     ALLEGRO_DISPLAY* disp = inicializa_tela(DEFAULT_WIDTH*2, DEFAULT_HEIGHT*2);
     testa_init(disp, "display");
-    ALLEGRO_FONT* font = al_create_builtin_font();
+    ALLEGRO_FONT* font = al_create_builtin_font(); // inicializa fonte
     testa_init(font, "addon de fonte");
     memset(key, 0, sizeof(key));
     
-    testa_init(al_install_keyboard(), "teclado");
-    testa_init(al_install_mouse(), "mouse");
+    testa_init(al_install_keyboard(), "teclado"); //instala teclado
+    testa_init(al_install_mouse(), "mouse"); // instala mouse
 
-    testa_init(al_install_audio(), "audio");
-    testa_init(al_init_acodec_addon(), "codecs de audio");
+    testa_init(al_install_audio(), "audio"); // instala audio
+    testa_init(al_init_acodec_addon(), "codecs de audio"); // instala codecs de audio
     testa_init(al_reserve_samples(16), "reserve samples");
     t_sons sons = carrega_sons();
-    testa_init(al_init_image_addon(), "addon de imagem");
+    testa_init(al_init_image_addon(), "addon de imagem"); // instala addon de imagem
     t_sprites sprites = carrega_sprites();
 
-    setup_transform(disp);
-
-    ALLEGRO_BITMAP *logo = al_load_bitmap("./resources/bdlogo.png");
-    testa_init(logo, "logo");
+    setup_transform(disp); // aplica transform para dar rescale na tela
 
     ALLEGRO_BITMAP **help = calloc(3, sizeof(ALLEGRO_BITMAP*));
     gera_tela_help(help);
-
-    ALLEGRO_BITMAP *heart = al_load_bitmap("./resources/heart.png");
-    testa_init(heart, "heart");
 
     al_register_event_source(queue, al_get_keyboard_event_source());
     al_register_event_source(queue, al_get_display_event_source(disp));
@@ -89,7 +83,7 @@ int main(){
     al_register_event_source(queue, al_get_timer_event_source(timer_pedras));
 
     while(1){ // loop do menu
-        al_draw_bitmap(logo, DEFAULT_WIDTH/5, 20, 0);
+        al_draw_bitmap(sprites.logo, DEFAULT_WIDTH/5, 20, 0);
         // al_draw_scaled_bitmap(logo, 0, 0, larguraLogo, alturaLogo, 300, 50 + OFF, larguraLogo/3, alturaLogo/3, 0);
         al_draw_text(font, branco, DEFAULT_WIDTH/2, 250, ALLEGRO_ALIGN_CENTER, "Pressione a barra de espaço para jogar");
         al_flip_display();
@@ -170,9 +164,9 @@ int main(){
                     if(event.timer.source == timer_player){
                         if((key[ALLEGRO_KEY_UP] || key[ALLEGRO_KEY_W]) && !colisao(area, UP, player)){
                             if(area[player.y-1][player.x].tipo == SaidaAberta)
-                                passou = 1;
-                            move_player(area, &player, UP);
-                            coleta_diamante(area, &player, &jogo, sons, &diamantes);
+                                passou = 1; // se o player andar para a saida aberta, passou de level
+                            move_player(area, &player, UP); // funcao para incrementar a posicao do player
+                            coleta_diamante(area, &player, &jogo, sons, &diamantes); // funcao que verifica se existe um diamante no lugar dele e coleta
                         }
 
                         else if((key[ALLEGRO_KEY_DOWN] || key[ALLEGRO_KEY_S]) && !colisao(area, DOWN, player)){
@@ -185,8 +179,8 @@ int main(){
                         else if((key[ALLEGRO_KEY_LEFT] || key[ALLEGRO_KEY_A]) && !colisao(area, LEFT, player)){
                             if(area[player.y][player.x-1].tipo == SaidaAberta)
                                 passou = 1;
-                            else if (area[player.y][player.x-1].tipo == Rock)
-                                empurra(area, &player, pedras, LEFT);
+                            else if (area[player.y][player.x-1].tipo == Rock) // caso o player esteja do lado de uma pedra
+                                empurra(area, &player, pedras, LEFT); // tenta empurrar pedra
                             else
                                 move_player(area, &player, LEFT);
                             coleta_diamante(area, &player, &jogo, sons, &diamantes); 
@@ -202,60 +196,57 @@ int main(){
                             coleta_diamante(area, &player, &jogo, sons, &diamantes);
                         }else player.dir = STILL;
 
-                        if(area[player.y][player.x].tipo == Dirt){ //cava
-                            area[player.y][player.x].tipo = Empty;
-                            al_play_sample(sons.terra, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
-                        }
-                            
-                        if(area[player.y][player.x].tipo == Diamond){ // coleta diamante
-                            area[player.y][player.x].tipo = Empty;
-                            diamante_coletado = busca_nodo(diamantes, player.x, player.y);
-                            deleta_nodo(&diamantes, diamante_coletado);
-                            jogo.d_restantes--;
-                            player.score+=10;
+                        if(area[player.y][player.x].tipo == Dirt){ // verifica se existe uma terra na posicao do player
+                            area[player.y][player.x].tipo = Empty; // se sim, troca a terra por vazio
+                            al_play_sample(sons.terra, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL); // toca som de terra
                         }
                     }
 
-                    jogo.t_restante = TEMPO_LIMITE - al_get_timer_count(relogio);
+                    jogo.t_restante = TEMPO_LIMITE - al_get_timer_count(relogio); // tempo restante sera o limite menos o timer atual
 
-                    if(jogo.d_restantes <= 0)
+                    if(jogo.d_restantes <= 0) // se diamantes coletados forem o suficiente, abre a saida
                         abre_saida(area, jogo);
-                    if (jogo.t_restante == 0)
+                    if (jogo.t_restante == 0) // se o tempo restante for 0, o player morre
                         player.vivo = 0;
+
                     for(int i = 0; i < ALLEGRO_KEY_MAX; i++)
                         key[i] &= KEY_SEEN;
+
                     tela_jogo = 1;
                     break;
 
                 case ALLEGRO_EVENT_KEY_DOWN:
                     key[event.keyboard.keycode] = KEY_SEEN | KEY_RELEASED;
                     if (key[ALLEGRO_KEY_PGDN] && jogo.n_level > 1){
-                        jogo.n_level--;
+                        jogo.n_level--; // PageDown para diminuir um level
                         jogo.reset = 1;
                     }else
                     if (key[ALLEGRO_KEY_PGUP] && jogo.n_level < 10){
-                        jogo.n_level++;
+                        jogo.n_level++; // PageUp para aumentar um level
                         jogo.reset = 1;
                     }else
                     if (key[ALLEGRO_KEY_H]){
-                        tela_help = 1;
+                        tela_help = 1; // H mostra a tela de ajuda
                         tela_jogo = 0;
                     }else
-                    if(key[ALLEGRO_KEY_M]){
-                        sprites.rock = sprites.prof;
+                    if(key[ALLEGRO_KEY_M]){ // easter egg
+                        if(easter_egg)
+                            easter_egg = 0;
+                        else
+                            easter_egg = 1;
                     }else
-                    if(key[ALLEGRO_KEY_R]){
+                    if(key[ALLEGRO_KEY_R]){ // reinicia o level atual
                         player.vivo = 0;
                     }
-                    if(key[ALLEGRO_KEY_ESCAPE])
+                    if(key[ALLEGRO_KEY_ESCAPE]) // sai do jogo
                         exit(0);
                     break;
                 case ALLEGRO_EVENT_MOUSE_BUTTON_DOWN:
-                    if ((event.mouse.button & 2) && jogo.n_level > 1){
+                    if ((event.mouse.button & 2) && event.mouse.x < 50 &&jogo.n_level > 1){
                         jogo.n_level--;
                         jogo.reset = 1;
                     }else
-                    if((event.mouse.button & 1) && jogo.n_level < 10){
+                    if((event.mouse.button & 1) && event.mouse.x > (DEFAULT_WIDTH - 50) && jogo.n_level < 10){
                         jogo.n_level++;
                         jogo.reset = 1;
                     }
@@ -294,14 +285,16 @@ int main(){
             }
 
             if(tela_jogo && event.timer.source == timer_fps){
+                al_clear_to_color(preto);
                 if(jogo.d_restantes == 0)
                     al_draw_text(font, branco, 300, 5, 0, "Saída Aberta!");
-                al_clear_to_color(preto);
+                if(easter_egg)
+                    al_draw_bitmap(sprites.menottidash, 0, 0, 0);
                 al_draw_textf(font, branco, 10, 5, 0, "Diamantes restantes: %d", jogo.d_restantes);
                 al_draw_textf(font, branco, 200, 5, 0, "Score: %d", player.score);
                 al_draw_textf(font, branco, 300, 5, 0, "Vidas:");
                 for(int j = 1; j <= player.vidas; j++) // desenha as vidas
-                    al_draw_bitmap(heart, 340+(10*j), 4, 0);
+                    al_draw_bitmap(sprites.heart, 340+(10*j), 4, 0);
                 // al_draw_textf(font, branco, 300, 5, 0, "%d Pedras %d Diamantes", conta_nodos(pedras), conta_nodos(diamantes));
                 al_draw_textf(font, branco, 500, 5, 0, "Time: %d", jogo.t_restante);
                 desenha_mapa(area, sprites);
@@ -312,7 +305,10 @@ int main(){
                 }else if (player.dir == RIGHT){
                     al_draw_bitmap(sprites.player_right[frame_player], player.x*16, player.y*16 + OFF, 0);
                 }
-                desenha_pedras(pedras, sprites);
+                if(easter_egg)
+                    desenha_menotti(pedras, sprites);
+                else
+                    desenha_pedras(pedras, sprites);
                 desenha_diamantes(diamantes, sprites, frame_diamante);
                 desenha_butterflies(butterflies, sprites, frame_inimigos);
                 desenha_fireflies(fireflies, sprites, frame_inimigos);
