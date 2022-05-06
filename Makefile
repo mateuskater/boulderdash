@@ -3,8 +3,8 @@ LDLIBS = $$(pkg-config allegro-5 allegro_font-5 allegro_image-5 allegro_audio-5 
 
 OBJS = game.o display.o lista.o init_sprites.o som.o funcoes.o
 
-all: game
-game: $(OBJS)
+all: bdash
+bdash: $(OBJS)
 
 funcoes.o: funcoes.c game.h
 	gcc -c funcoes.c $(LDLIBS) $(CFLAGS)
